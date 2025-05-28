@@ -295,31 +295,31 @@ plt.show()
 
 """**Insight :**
 
-1. **Distribusi Berbentuk Mendekati Normal, Tapi Tidak Sempurna**
+  1. **Distribusi Berbentuk Mendekati Normal, Tapi Tidak Sempurna**
 
-   * Sebagian besar film memiliki rating rata-rata antara **2.5 hingga 4.0**, yang merupakan kisaran "cukup hingga bagus".
-   * Puncak distribusi ada di sekitar **rating 3.5–4.0**, menandakan banyak film mendapatkan respons positif dari penonton.
+    * Sebagian besar film memiliki rating rata-rata antara **2.5 hingga 4.0**, yang merupakan kisaran "cukup hingga bagus".
+    * Puncak distribusi ada di sekitar **rating 3.5–4.0**, menandakan banyak film mendapatkan respons positif dari penonton.
 
-2. **Pola Bar yang "Bergelombang"**
+  2. **Pola Bar yang "Bergelombang"**
 
-   * Ada lonjakan tajam di rating bulat seperti **3.0**, **4.0**, dan **5.0**.
-   * Hal ini mengindikasikan:
+    * Ada lonjakan tajam di rating bulat seperti **3.0**, **4.0**, dan **5.0**.
+    * Hal ini mengindikasikan:
 
-     * Banyak penonton yang cenderung memberi rating bulat, bukan desimal.
-     * Atau, rating rata-rata bulat terjadi karena banyak film memiliki jumlah rating sedikit.
+      * Banyak penonton yang cenderung memberi rating bulat, bukan desimal.
+      * Atau, rating rata-rata bulat terjadi karena banyak film memiliki jumlah rating sedikit.
 
-3. **Film dengan Rating Sangat Rendah (1.0–2.0) Relatif Sedikit**
+  3. **Film dengan Rating Sangat Rendah (1.0–2.0) Relatif Sedikit**
 
-   * Ini menunjukkan bahwa sangat sedikit film yang dianggap buruk secara universal.
-   * Bisa juga disebabkan karena film yang sangat buruk tidak banyak ditonton/rated.
+    * Ini menunjukkan bahwa sangat sedikit film yang dianggap buruk secara universal.
+    * Bisa juga disebabkan karena film yang sangat buruk tidak banyak ditonton/rated.
 
-4. **Ada Film dengan Rating Mendekati 5.0**
+  4. **Ada Film dengan Rating Mendekati 5.0**
 
-   * Menunjukkan bahwa ada beberapa film yang sangat disukai oleh penonton (cult classics atau masterpiece).
+    * Menunjukkan bahwa ada beberapa film yang sangat disukai oleh penonton (cult classics atau masterpiece).
 
-5. **Skewness Tidak Terlalu Ekstrem**
+  5. **Skewness Tidak Terlalu Ekstrem**
 
-   * Distribusi relatif simetris dengan kecenderungan sedikit ke kanan, artinya film cenderung mendapat nilai lebih tinggi daripada rendah.
+    * Distribusi relatif simetris dengan kecenderungan sedikit ke kanan, artinya film cenderung mendapat nilai lebih tinggi daripada rendah.
 
 ### **e. Korelasi Antar Fitur Numerik Film**
 """
@@ -375,6 +375,8 @@ Ini menunjukkan bahwa:
   - Durasi film bukan indikator utama apakah film disukai atau tidak.
 
   - Tahun rilis juga bukan penentu utama untuk nilai atau popularitas film
+
+### **f. Top 10 Movies Berdasarkan Popularity**
 """
 
 import pandas as pd
@@ -589,7 +591,7 @@ cosine_sim_df = pd.DataFrame(cosine_sim, index=movie_merged['title'], columns=mo
 print('Shape:', cosine_sim_df.shape)
 
 # Melihat similarity matrix pada setiap resto
-cosine_sim_df.sample(5, axis=1).sample(10, axis=0)
+cosine_sim_df.sample(5, axis=1).sample(20, axis=0)
 
 """**Insight:**
 
@@ -607,42 +609,35 @@ Matriks ini bisa dipakai untuk mencari film yang mirip dengan film tertentu — 
 def movie_recommendations(title, similarity=cosine_sim_df, items=movie_merged[['title', 'genres']], k=5):
     """
     Rekomendasi Movie berdasarkan kemiripan dataframe
-
-    Parameter:
-    ---
-    title : tipe data string (str)
-                Judul movie (index kemiripan dataframe)
-    similarity : tipe data pd.DataFrame (object)
-                      Kesamaan dataframe, simetrik, dengan resto sebagai
-                      indeks dan kolom
-    items : tipe data pd.DataFrame (object)
-            Mengandung kedua nama dan fitur lainnya yang digunakan untuk mendefinisikan kemiripan
-    k : tipe data integer (int)
-        Banyaknya jumlah rekomendasi yang diberikan
-    ---
-
-    Pada index ini, kita mengambil k dengan nilai similarity terbesar
-    pada index matrix yang diberikan (i).
     """
+    if title not in similarity.columns:
+        raise ValueError(f"Title '{title}' tidak ditemukan di similarity matrix.")
 
-    # Mengambil data dengan menggunakan argpartition untuk melakukan partisi secara tidak langsung sepanjang sumbu yang diberikan
-    # Dataframe diubah menjadi numpy
-    # Range(start, stop, step)
-    index = similarity.loc[:, title].to_numpy().argpartition(range(-1, -k, -1)).flatten()
+    # Pastikan jumlah rekomendasi tidak melebihi jumlah film yang tersedia
+    k = min(k, similarity.shape[0] - 1)
 
-    # Mengambil data dengan similarity terbesar dari index yang ada
-    most_similiar = similarity.columns[index[-1:-(k+2):-1]]
+    # Ambil index dari film yang paling mirip
+    index = similarity.loc[:, title].to_numpy().argpartition(range(-1, -k-1, -1)).flatten()
+    most_similar = similarity.columns[index[-1:-(k+2):-1]]
+    most_similar = most_similar.drop(title, errors='ignore')
 
-    # Drop title agar nama resto yang dicari tidak muncul dalam daftar rekomendasi
-    most_similiar = most_similiar.drop(title, errors='ignore')
+    return (
+        pd.DataFrame(most_similar, columns=['title'])
+        .merge(items.drop_duplicates('title'), on='title')
+        .head(k)
+    )
 
-    return pd.DataFrame(most_similiar).merge(items).head(k)
+cosine_sim_df = cosine_sim_df[~cosine_sim_df.index.duplicated(keep='first')]
 
-movie_merged[movie_merged.title.eq('Oliver Twist')]
+movie_merged[movie_merged.title.eq('Man\'s Favorite Sport?')]
 
-movie_recommendations('Oliver Twist')
+movie_recommendations('Man\'s Favorite Sport?')
 
-"""# **Problem Answers**
+"""**Insight :**
+
+Model berhasil memberikan rekomendasi film yang relevan berdasarkan kemiripan vektor fitur antar film. Ketika diberikan input "Man's Favorite Sport?", model mampu mengusulkan film-film dengan genre yang sebagian besar masih berkaitan (misalnya **Romance** dan **Drama**), meskipun ada sedikit variasi dalam genre (seperti **Adventure** atau **Fantasy**), yang umum dalam sistem berbasis konten. Ini menunjukkan bahwa pendekatan cosine similarity pada representasi fitur (kemungkinan dari genre atau metadata lainnya) bekerja secara efektif dalam mengidentifikasi kemiripan antar film.
+
+# **Problem Answers**
 
 **1. Bagaimana cara merepresentasikan informasi genre film secara numerik agar bisa digunakan dalam perhitungan kemiripan antar film?**
 """

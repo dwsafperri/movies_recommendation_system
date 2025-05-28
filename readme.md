@@ -142,7 +142,7 @@ movies.describe()
 ### **a. Distribusi Rating**
 
 <p align="center">
-  <img src="images/3a.png"width="1000"/>
+  <img src="images/3a.png"width="500"/>
 </p>
 
 **Insight :**
@@ -165,7 +165,7 @@ movies.describe()
 ### **b. Distribusi Tahun Rilis Film**
 
 <p align="center">
-  <img src="images/3b.png"width="1000"/>
+  <img src="images/3b.png"width="500"/>
 </p>
 
 **Insight :**
@@ -192,7 +192,7 @@ movies.describe()
 ### **c. Distribusi Runtime**
 
 <p align="center">
-  <img src="images/3c.png"width="1000"/>
+  <img src="images/3c.png"width="500"/>
 </p>
 
 **Insight :**
@@ -216,7 +216,7 @@ movies.describe()
 ### **d. Rating Rata-Rata per Film**
 
 <p align="center">
-  <img src="images/3d.png"width="1000"/>
+  <img src="images/3d.png"width="500"/>
 </p>
 
 **Insight :**
@@ -241,7 +241,7 @@ movies.describe()
 ### **e. Korelasi Antar Fitur Numerik Film**
 
 <p align="center">
-  <img src="images/3e.png"width="1000"/>
+  <img src="images/3e.png"width="500"/>
 </p>
 
 **Insight :**
@@ -263,7 +263,7 @@ movies.describe()
 ### **f. Top 10 Movies Berdasarkan Popularity**
 
 <p align="center">
-  <img src="images/3f.png"width="1000"/>
+  <img src="images/3f.png"width="500"/>
 </p>
 
 **Insight :**

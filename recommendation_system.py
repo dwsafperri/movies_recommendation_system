@@ -254,32 +254,16 @@ sns.histplot(movies['runtime'].dropna(), bins=50)
 plt.title('Distribusi Durasi Film (menit)')
 plt.xlabel('Durasi (menit)')
 plt.ylabel('Jumlah Film')
+plt.xlim(0, 250)  # Batasi sumbu X dari 0 sampai 250 menit
 plt.show()
 
 """**Insight :**
 
-1. **Mayoritas Film Berdurasi 80–120 Menit**
+1. Film paling umum berdurasi 90–100 menit.
 
-   * Puncak histogram berada di kisaran durasi tersebut, yang juga merupakan **durasi standar film bioskop**.
-   * Ini menunjukkan bahwa sebagian besar film diproduksi dengan mempertimbangkan kenyamanan menonton.
+2. Ada sejumlah kecil film yang sangat pendek atau panjang, tapi tidak mendominasi.
 
-2. **Distribusi Positively Skewed (Skew Kanan)**
-
-   * Banyak film berdurasi normal (sekitar 100 menit), tapi ada **sedikit film dengan durasi sangat panjang**, bahkan di atas 300 menit.
-   * Beberapa dari ini mungkin adalah film dokumenter, serial gabungan, atau data outlier.
-
-3. **Outlier Durasi Ekstrem**
-
-   * Ada film yang berdurasi **di atas 400–900 menit**, yang sangat tidak umum.
-   * Bisa jadi itu:
-
-     * Salah input (data error),
-     * Film eksperimental,
-     * Kompilasi/serial dimasukkan sebagai satu film.
-
-4. **Durasi Kurang dari 40 Menit Juga Ada**
-
-   * Ini kemungkinan merupakan film pendek atau special features.
+3. Durasi 0 kemungkinan perlu diperlakukan sebagai data tidak valid dalam analisis lanjutan.
 
 ### **d. Rating Rata-Rata per Film**
 """
@@ -411,9 +395,7 @@ plt.show()
 
 4. **Film lama tetap bisa populer** — seperti *Pulp Fiction* dan *The Shawshank Redemption*. Ini menandakan bahwa faktor usia tidak selalu mengurangi popularitas jika film punya kualitas atau status "cult classic".
 
----
-
-### Insight Tambahan
+**Insight Tambahan**
 
 * **Popularitas ≠ Rating Tinggi**
   Beberapa film populer seperti *Minions* mungkin tidak memiliki rating tertinggi secara kritis, tapi tetap banyak ditonton karena **segmentasi pasar dan daya tarik massal**.
@@ -456,6 +438,8 @@ df.head()
 """**Insight :**
 
 Data berhasil diubah dari format string kompleks menjadi format yang lebih sederhana dan mudah dipakai, dan disimpan dalam dataframe `df`.
+
+### **b. Mengubah tipe data movieId menjadi string**
 """
 
 ## Mengubah tipe data movieId menjadi string
@@ -469,7 +453,7 @@ ratings.info()
 
 Kolom movieId pada dataframe df dan ratings diubah menjadi string.
 
-### b. Merge Data
+### c. Merge Data
 """
 
 movie_merged = pd.merge(ratings, df, on='movieId',how="inner")
@@ -479,7 +463,7 @@ movie_merged
 
 Data berhasil di merge berdasarkan kolom `movieId` dengan jumlah data 992 baris dan 6 kolom.
 
-### c. Handle Missing Values
+### d. Handle Missing Values
 """
 
 movie_merged.isnull().sum()
@@ -488,7 +472,7 @@ movie_merged.isnull().sum()
 
 Tidak terdapat missing values.
 
-### d. Handle Duplicated Data
+### e. Handle Duplicated Data
 """
 
 movie_merged.duplicated().sum()
@@ -497,7 +481,59 @@ movie_merged.duplicated().sum()
 
 Tidak terdapat data duplicate
 
-### e. Memecah genres yang dipisahkan oleh |
+### f. Menangani Outlier dengan IQR Method
+"""
+
+movie_merged.describe()
+
+# Mengganti Nilai Outlier dengan Batas Atas dan Batas Bawah Data
+
+for i in movie_merged.select_dtypes(include='number'):
+    Q1 = movie_merged[i].quantile(0.25)
+    Q3 = movie_merged[i].quantile(0.75)
+    IQR = Q3 - Q1
+
+    maximum = Q3 + (1.5 * IQR)
+    minimum = Q1 - (1.5 * IQR)
+
+    movie_merged[i] = movie_merged[i].mask(movie_merged[i] > maximum, maximum)
+    movie_merged[i] = movie_merged[i].mask(movie_merged[i] < minimum, minimum)
+
+# Buat grid 3x3
+fig, axes = plt.subplots(nrows=4, ncols=2, figsize=(12, 12))
+fig.suptitle('Boxplot of Numerical Features', fontsize=16)
+
+# Flatten axes supaya bisa di-loop
+axes = axes.flatten()
+
+# Loop fitur dan plot
+numerical_feature = ['userId', 'rating', 'timestamp']
+for i, feature in enumerate(numerical_feature):
+    sns.boxplot(data=movie_merged, x=feature, ax=axes[i], color='skyblue')
+    axes[i].set_title(f'{feature}')
+    axes[i].set_xlabel('')
+
+# Sembunyikan subplot yang tidak dipakai (jika jumlah fitur < jumlah grid)
+for j in range(len(numerical_feature), len(axes)):
+    fig.delaxes(axes[j])
+
+plt.tight_layout(rect=[0, 0, 1, 0.96])  # Agar tidak ketimpa judul
+plt.show()
+
+"""**Insight :**
+
+| Fitur         | Insight                                                                                                                                                              |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **userId**    | Distribusi user cukup merata tanpa outlier. Semua nilai userId berada dalam rentang wajar (0–270k). Tidak ada titik ekstrem.                                         |
+| **rating**    | Rentang rating hanya dari 0.5 hingga 5, dan sudah **tidak ada outlier**. Distribusi simetris dengan median sekitar 3.5. Artinya sistem rating berjalan sesuai skala. |
+| **timestamp** | Distribusi waktu rating (dalam format Unix timestamp) juga sudah **tanpa outlier**. Data berkisar dari sekitar 2007 hingga 2017.                                     |
+
+**Kesimpulan :**
+
+* Penanganan outlier berhasil — tidak ada lagi nilai ekstrem atau titik individu terisolasi pada semua fitur numerik.
+* Data siap digunakan untuk analisis atau modeling lebih lanjut karena sudah bersih dan stabil.
+
+### g. Memecah genres yang dipisahkan oleh |
 """
 
 genres = set()
@@ -511,7 +547,9 @@ print(genres_list)
 
 """**Insight :**
 
-Kode ini mengambil semua genre unik dari kolom `genres` pada DataFrame `movie_merged`. Genre yang awalnya dipisah dengan `|` dipecah menjadi elemen terpisah, lalu dimasukkan ke dalam set agar tidak ada duplikat. Hasilnya adalah daftar genre unik yang ada di data.
+Kode ini mengambil semua genre dari kolom genres pada DataFrame movie_merged, di mana setiap entri genre dipisahkan oleh karakter ' | '. Fungsi .str.get_dummies(sep=' | ') memisahkan string genre berdasarkan delimiter tersebut, kemudian membuat kolom biner (dummy variables) untuk masing-masing genre yang unik.
+
+Setiap kolom baru mewakili satu genre, dan nilainya 1 jika film tersebut memiliki genre tersebut, atau 0 jika tidak. Setelah itu, DataFrame dummy tersebut digabungkan kembali ke movie_merged dengan pd.concat() secara horizontal (axis=1), sehingga dataset kini memiliki representasi genre dalam bentuk numerik
 
 # **Model Development dengan Content Based Features**
 
@@ -601,7 +639,7 @@ Setiap sel menunjukkan seberapa mirip dua film berdasarkan TF-IDF genre-nya:
 
 - Nilai mendekati 0 berarti tidak mirip.
 
-Contoh: The Breakfast Club sangat mirip dengan Grill Point (1.0), artinya genre mereka identik.
+Contoh: The Day After Tomorrow sangat mirip dengan Jurassic Park (0.825126), artinya genre mereka identik.
 
 Matriks ini bisa dipakai untuk mencari film yang mirip dengan film tertentu — cocok untuk sistem rekomendasi.
 """
@@ -698,7 +736,7 @@ test_movie_recommendation()
 
 Model berhasil memberikan rekomendasi film berdasarkan kemiripan genre.
 
-Film seperti Saw II dan The Tunnel direkomendasikan karena memiliki genre yang serupa dengan Jurassic Park, seperti science fiction atau horror, sesuai dengan pendekatan content-based filtering. Ini menunjukkan bahwa sistem dapat menemukan film sejenis hanya dari input satu judul film.
+Film seperti Grill Point, Tough Enough, dan Big Fish direkomendasikan karena memiliki genre yang serupa, seperti Drama, Adventure, atau Thriller, sesuai dengan pendekatan content-based filtering. Ini menunjukkan bahwa sistem dapat menemukan film sejenis hanya dari input satu judul film.
 
 # **Referensi**
 

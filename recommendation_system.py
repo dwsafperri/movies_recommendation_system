@@ -586,11 +586,11 @@ Matriks tersebut menunjukkan **kemiripan antar film berdasarkan genre** dalam be
 Singkatnya, ini dasar untuk sistem rekomendasi film berbasis genre.
 """
 
-# Membuat dataframe dari variabel cosine_sim dengan baris dan kolom berupa nama resto
+# Membuat dataframe dari variabel cosine_sim dengan baris dan kolom berupa judul movie
 cosine_sim_df = pd.DataFrame(cosine_sim, index=movie_merged['title'], columns=movie_merged['title'])
 print('Shape:', cosine_sim_df.shape)
 
-# Melihat similarity matrix pada setiap resto
+# Melihat similarity matrix pada setiap movie
 cosine_sim_df.sample(5, axis=1).sample(20, axis=0)
 
 """**Insight:**
@@ -676,7 +676,7 @@ print(f"Similarity antara '{movie_1}' dan '{movie_2}': {similarity_score:.4f}")
 
 """**Insight :**
 
-Dengan menghitung cosine similarity dari representasi TF-IDF genre, kita bisa mengukur seberapa mirip dua film berdasarkan kontennya. Nilai similarity **0.8289 **menunjukkan bahwa *Men in Black II* dan *Jurassic Park* memiliki genre yang sangat mirip berdasarkan representasi TF-IDF. Artinya, kedua film ini kemungkinan berbagi genre seperti action, adventure, atau sci-fi, sehingga dianggap sangat mirip oleh sistem content-based.
+Dengan menghitung cosine similarity dari representasi TF-IDF genre, kita bisa mengukur seberapa mirip dua film berdasarkan kontennya. Nilai similarity **0.8289** menunjukkan bahwa *Men in Black II* dan *Jurassic Park* memiliki genre yang sangat mirip berdasarkan representasi TF-IDF. Artinya, kedua film ini kemungkinan berbagi genre seperti action, adventure, atau sci-fi, sehingga dianggap sangat mirip oleh sistem content-based.
 
 **c. Bagaimana cara mengembangkan sistem rekomendasi film yang mampu memberikan saran film sejenis hanya dari satu input judul film?**
 """

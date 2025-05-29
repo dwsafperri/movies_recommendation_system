@@ -197,19 +197,11 @@ movies.describe()
 
 **Insight :**
 
-1. **Mayoritas Film Berdurasi 80–120 Menit**
-   - Durasi ini adalah standar film bioskop.
+1. Film paling umum berdurasi 90–100 menit.
 
-2. **Distribusi Positively Skewed**
-   - Ada film berdurasi sangat panjang (hingga 900 menit) yang menjadi outlier.
+2. Ada sejumlah kecil film yang sangat pendek atau panjang, tapi tidak mendominasi.
 
-3. **Outlier Durasi Ekstrem**
-   - Kemungkinan:
-     - Salah input
-     - Film eksperimental atau kompilasi
-
-4. **Durasi Kurang dari 40 Menit**
-   - Kemungkinan adalah film pendek.
+3. Durasi 0 kemungkinan perlu diperlakukan sebagai data tidak valid dalam analisis lanjutan.
 
 ---
 
@@ -334,6 +326,29 @@ ratings['movieId'] = ratings['movieId'].astype(str)
 df.info()
 ratings.info()
 ```
+```
+<class 'pandas.core.frame.DataFrame'>
+Index: 10000 entries, 43526 to 27147
+Data columns (total 3 columns):
+ #   Column   Non-Null Count  Dtype 
+---  ------   --------------  ----- 
+ 0   movieId  10000 non-null  object
+ 1   title    9999 non-null   object
+ 2   genres   10000 non-null  object
+dtypes: object(3)
+memory usage: 312.5+ KB
+<class 'pandas.core.frame.DataFrame'>
+Index: 10000 entries, 11928665 to 13549562
+Data columns (total 4 columns):
+ #   Column     Non-Null Count  Dtype  
+---  ------     --------------  -----  
+ 0   userId     10000 non-null  int64  
+ 1   movieId    10000 non-null  object 
+ 2   rating     10000 non-null  float64
+ 3   timestamp  10000 non-null  int64  
+dtypes: float64(1), int64(2), object(1)
+memory usage: 390.6+ KB
+```
 
 **Insight :**
 Kolom `movieId` pada dataframe `df` dan `ratings` diubah menjadi string agar konsisten saat digabungkan.
@@ -347,6 +362,22 @@ movie_merged = pd.merge(ratings, df, on='movieId', how="inner")
 movie_merged
 ```
 
+```
+	userId	movieId	rating	timestamp	title	genres
+0	43059	1367	4.0	1088197740	Rocky II	Drama
+1	255724	4975	1.0	1082336474	Love Is the Devil: Study for a Portrait of Fra...	TV Movie | Drama
+2	246259	587	4.0	945228093	Big Fish	Adventure | Fantasy | Drama
+3	72228	3022	3.5	1117138601	Dr. Jekyll and Mr. Hyde	Drama | Horror | Science Fiction
+4	218871	5991	3.5	1287676841	The Last Laugh	Drama
+...	...	...	...	...	...	...
+987	116964	2734	3.0	1008741797	David	Drama | History
+988	152250	69928	4.0	1339373959	The Man Who Loved Women	Comedy
+989	118327	2108	4.0	1017621443	The Breakfast Club	Comedy | Drama
+990	183641	919	4.0	1454248623	Blood: The Last Vampire	Fantasy | Animation | Horror | Comedy | Thrill...
+991	135992	316	3.0	847883933	Grill Point	Comedy | Drama
+992 rows × 6 columns
+```
+
 **Insight :**
 Data berhasil di-merge berdasarkan kolom `movieId`, menghasilkan 992 baris dan 6 kolom: `userId`, `movieId`, `rating`, `timestamp`, `title`, dan `genres`.
 
@@ -358,6 +389,15 @@ Data berhasil di-merge berdasarkan kolom `movieId`, menghasilkan 992 baris dan 6
 movie_merged.isnull().sum()
 ```
 
+| Kolom      | Jumlah Null |
+|------------|-------------|
+| userId     | 0           |
+| movieId    | 0           |
+| rating     | 0           |
+| timestamp  | 0           |
+| title      | 0           |
+| genres     | 0           |
+
 **Insight :**
 Tidak terdapat missing values dalam data `movie_merged`.
 
@@ -368,13 +408,51 @@ Tidak terdapat missing values dalam data `movie_merged`.
 ```python
 movie_merged.duplicated().sum()
 ```
-
+```
+Output :
+np.int64(0)
+```
 **Insight :**
 Tidak terdapat data duplikat dalam `movie_merged`.
 
 ---
 
-### **f. Memecah Genres yang Dipisahkan oleh `|`**
+### f. Menangani Outlier dengan IQR Method
+```
+# Mengganti Nilai Outlier dengan Batas Atas dan Batas Bawah Data
+
+for i in movie_merged.select_dtypes(include='number'):
+    Q1 = movie_merged[i].quantile(0.25)
+    Q3 = movie_merged[i].quantile(0.75)
+    IQR = Q3 - Q1
+
+    maximum = Q3 + (1.5 * IQR)
+    minimum = Q1 - (1.5 * IQR)
+
+    movie_merged[i] = movie_merged[i].mask(movie_merged[i] > maximum, maximum)
+    movie_merged[i] = movie_merged[i].mask(movie_merged[i] < minimum, minimum)
+```
+
+<p align="center">
+  <img src="images/outlier.png"width="500"/>
+</p>
+
+**Insight :**
+
+| Fitur         | Insight                                                                                                                                                              |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **userId**    | Distribusi user cukup merata tanpa outlier. Semua nilai userId berada dalam rentang wajar (0–270k). Tidak ada titik ekstrem.                                         |
+| **rating**    | Rentang rating hanya dari 0.5 hingga 5, dan sudah **tidak ada outlier**. Distribusi simetris dengan median sekitar 3.5. Artinya sistem rating berjalan sesuai skala. |
+| **timestamp** | Distribusi waktu rating (dalam format Unix timestamp) juga sudah **tanpa outlier**. Data berkisar dari sekitar 2007 hingga 2017.                                     |
+
+**Kesimpulan :**
+
+* Penanganan outlier berhasil — tidak ada lagi nilai ekstrem atau titik individu terisolasi pada semua fitur numerik.
+* Data siap digunakan untuk analisis atau modeling lebih lanjut karena sudah bersih dan stabil.
+
+---
+
+### **g. Memecah Genres yang Dipisahkan oleh `|`**
 
 ```python
 genres = set()
@@ -389,8 +467,6 @@ print(genres_list)
 
 **Insight :**
 Kode ini mengekstrak semua genre unik dari kolom `genres` pada `movie_merged`, memisahkan dengan delimiter `|`, dan menyimpannya dalam list tanpa duplikat. Hasil akhirnya adalah daftar genre unik yang bisa digunakan untuk analisis lanjutan.
-
-Berikut adalah **Model Development (MD)** versi final dari proses Content-Based Filtering dengan fitur TF-IDF berdasarkan kolom `genres`, lengkap dan rapi untuk kamu masukkan ke laporan:
 
 ---
 
@@ -408,6 +484,31 @@ tfidf = TfidfVectorizer()
 
 # Fit dan transform kolom genres menjadi matriks TF-IDF
 tfidf_matrix = tfidf.fit_transform(movie_merged['genres'])
+
+# Melihat ukuran matrix tfidf
+tfidf_matrix.shape
+```
+> (992, 22)
+
+```
+# Mengubah vektor tf-idf dalam bentuk matriks dengan fungsi todense()
+tfidf_matrix.todense()
+```
+
+```
+matrix([[0.        , 0.        , 0.        , ..., 0.        , 0.        ,
+         0.        ],
+        [0.        , 0.        , 0.        , ..., 0.69140498, 0.        ,
+         0.        ],
+        [0.        , 0.59553039, 0.        , ..., 0.        , 0.        ,
+         0.        ],
+        ...,
+        [0.        , 0.        , 0.        , ..., 0.        , 0.        ,
+         0.        ],
+        [0.        , 0.        , 0.52798862, ..., 0.        , 0.        ,
+         0.        ],
+        [0.        , 0.        , 0.        , ..., 0.        , 0.        ,
+         0.        ]])
 ```
 
 > **Insight:**
@@ -565,7 +666,9 @@ Rekomendasi film mirip dengan 'Armageddon':
 
 **Insight :**
 
-Model berhasil memberikan rekomendasi film berdasarkan kemiripan genre menggunakan TF-IDF dan cosine similarity. Misalnya, film *Big Fish* atau *Dr. Jekyll and Mr. Hyde* direkomendasikan karena punya genre yang mirip dengan *Armageddon*. Ini menunjukkan bahwa sistem dapat memberikan saran film sejenis hanya dari satu input judul film, sesuai prinsip content-based filtering.
+Model berhasil memberikan rekomendasi film berdasarkan kemiripan genre.
+
+Film seperti Grill Point, Tough Enough, dan Big Fish direkomendasikan karena memiliki genre yang serupa, seperti Drama, Adventure, atau Thriller, sesuai dengan pendekatan content-based filtering. Ini menunjukkan bahwa sistem dapat menemukan film sejenis hanya dari input satu judul film.
 
 ---
 

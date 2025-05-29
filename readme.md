@@ -41,10 +41,9 @@ https://www.kaggle.com/api/v1/datasets/download/rounakbanik/the-movies-dataset
 data_ratings = pd.read_csv("/content/ratings.csv")
 data_ratings.info()
 ````
+RangeIndex: 26024289 entries, 0 to 26024288
 
-**Insight:**
-
-Data ratings memiliki 26.024.289 baris dan 4 fitur.
+Data columns (total 4 columns):
 
 | Kolom     | Deskripsi                                                           |
 | --------- | ------------------------------------------------------------------- |
@@ -52,6 +51,10 @@ Data ratings memiliki 26.024.289 baris dan 4 fitur.
 | movieId   | ID film yang diberi rating.                                         |
 | rating    | Nilai rating yang diberikan oleh pengguna (biasanya skala 1.0–5.0). |
 | timestamp | Waktu pemberian rating dalam format Unix timestamp.                 |
+
+**Insight:**
+
+Data ratings memiliki 26.024.289 baris dan 4 fitur.
 
 Karena data terlalu besar, hanya 10.000 data yang diambil:
 
@@ -68,10 +71,9 @@ data_movies = pd.read_csv("/content/movies_metadata.csv")
 data_movies.info()
 ```
 
-**Insight:**
+RangeIndex: 45466 entries, 0 to 45465
 
-Data movies memiliki 45.466 baris dan 24 kolom.
-
+Data columns (total 24 columns):
 | Kolom                   | Deskripsi                                     |
 | ----------------------- | --------------------------------------------- |
 | adult                   | Apakah film untuk dewasa (True/False).        |
@@ -98,6 +100,10 @@ Data movies memiliki 45.466 baris dan 24 kolom.
 | video                   | Apakah berupa video (True/False).             |
 | vote\_average           | Rata-rata rating pengguna.                    |
 | vote\_count             | Jumlah total suara/rating.                    |
+
+**Insight:**
+
+Data movies memiliki 45.466 baris dan 24 kolom.
 
 Karena data terlalu besar, hanya 10.000 data yang diambil:
 

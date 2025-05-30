@@ -634,16 +634,23 @@ cosine_sim_df.sample(5, axis=1).sample(20, axis=0)
 
 
 > **Insight:**
-Dari matrix similarity ini, terlihat bahwa film *Sissi* memiliki nilai kemiripan tertinggi dengan dirinya sendiri (nilai 1), yang wajar. Beberapa film lain seperti *Italian for Beginners* juga menunjukkan kemiripan cukup tinggi dengan *Sissi*, sedangkan film-film lain seperti *The Day After Tomorrow* atau *xXx* memiliki nilai kemiripan yang sangat rendah dengan *Sissi*. Ini menunjukkan bahwa sistem rekomendasi lebih cenderung mengaitkan film yang genre atau kontennya mirip secara spesifik, sehingga rekomendasi yang diberikan kemungkinan relevan dengan preferensi film yang dijadikan referensi.
+
+Setiap sel menunjukkan seberapa mirip dua film berdasarkan TF-IDF genre-nya:
+
+- Nilai 1 berarti film yang sama atau sangat mirip.
+
+- Nilai mendekati 0 berarti tidak mirip.
+
+Berdasarkan matriks similarity yang ditampilkan, film *Live and Let Die* memiliki nilai kemiripan tertinggi dengan film *xXx* sebesar 1.0, yang menunjukkan kesamaan genre atau fitur lainnya yang sangat kuat antara kedua film tersebut. Sementara itu, nilai kemiripan *Live and Let Die* dengan film-film lain seperti *The Day After Tomorrow* dan *Hot Fuzz* relatif lebih rendah. Hal ini mengindikasikan bahwa dalam sistem rekomendasi berbasis content filtering, film *Live and Let Die* cenderung direkomendasikan bersama film-film yang memiliki karakteristik serupa dengan *xXx*.
 
 ---
 
-### 3. **Fungsi Rekomendasi Film**
+### 3. **Movie Recommendation Function**
 
 Fungsi berikut dibuat untuk menghasilkan rekomendasi film berdasarkan judul film yang dimasukkan. Proses utama yang terjadi di fungsi ini adalah:
 
 1. **Validasi Judul Film Input**
-   Fungsi mulai dengan memastikan film yang kamu masukkan sebagai referensi (`title`) ada di dalam data cosine similarity matrix. Kalau gak ada, fungsi langsung kasih error supaya kamu tahu film itu tidak tersedia untuk rekomendasi.
+   Fungsi mulai dengan memastikan film yang dimasukkan sebagai referensi (`title`) ada di dalam data cosine similarity matrix. Kalau gak ada, fungsi langsung kasih error supaya tahu film itu tidak tersedia untuk rekomendasi.
 
 2. **Penentuan Jumlah Rekomendasi yang Realistis**
    Fungsi membatasi jumlah film rekomendasi yang akan dikembalikan supaya tidak melebihi jumlah film yang ada di data (dikurangi 1 karena film yang direferensikan gak masuk rekomendasi).
@@ -784,10 +791,6 @@ movie_recommendations('Beauty and the Beast', top_n = 10)
 
 ---
 
-Tentu! Berikut adalah versi **parafrase** dari bagian evaluasi yang kamu tulis, tetap dengan makna yang sama namun dengan gaya bahasa yang berbeda dan tetap akademis:
-
----
-
 ## **Evaluasi**
 
 Untuk menilai kinerja dari model **content-based filtering** dalam sistem rekomendasi film ini, digunakan tiga metrik utama yang berbasis relevansi, yaitu **Precision\@k**, **Recall\@k**, dan **F1-Score\@k**. Ketiga metrik ini umum digunakan dalam evaluasi sistem rekomendasi karena dapat mengukur seberapa tepat dan lengkap rekomendasi yang diberikan.
@@ -827,7 +830,7 @@ def evaluate_recommendation(ground_truth, k=5):
     f1_list = []
 
     for title, relevant_set in ground_truth.items():
-        # Ambil rekomendasi film dari fungsi kamu
+        # Ambil rekomendasi film dari fungsi
         recommended_df = movie_recommendations(title, top_n=k)
         recommended = set(recommended_df['title'])
         
@@ -879,7 +882,6 @@ Relevant Movies : ['The Getaway', 'Dr. Jekyll and Mr. Hyde', 'Big Fish']
 ```python
 # Cek apakah TF-IDF berhasil transform genre jadi matriks numerik
 try:
-    # tf sudah TfidfVectorizer dari kode kamu
     tfidf_matrix = tfidf.fit_transform(movie_merged['genres'])
     print("TF-IDF matrix shape:", tfidf_matrix.shape)
     assert tfidf_matrix.shape[0] == movie_merged.shape[0], "Jumlah baris TF-IDF harus sama dengan jumlah film"

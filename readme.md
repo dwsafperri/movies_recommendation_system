@@ -534,6 +534,8 @@ tfidf_matrix.shape
 tfidf_matrix.todense()
 ```
 
+**Hasil Output :**
+
 ```
 matrix([[0.        , 0.        , 0.        , ..., 0.        , 0.        ,
          0.        ],
@@ -638,7 +640,28 @@ Dari matrix similarity ini, terlihat bahwa film *Sissi* memiliki nilai kemiripan
 
 ### 3. **Fungsi Rekomendasi Film**
 
-Fungsi berikut dibuat untuk menghasilkan rekomendasi film berdasarkan judul film yang dimasukkan:
+Fungsi berikut dibuat untuk menghasilkan rekomendasi film berdasarkan judul film yang dimasukkan. Proses utama yang terjadi di fungsi ini adalah:
+
+1. **Validasi Judul Film Input**
+   Fungsi mulai dengan memastikan film yang kamu masukkan sebagai referensi (`title`) ada di dalam data cosine similarity matrix. Kalau gak ada, fungsi langsung kasih error supaya kamu tahu film itu tidak tersedia untuk rekomendasi.
+
+2. **Penentuan Jumlah Rekomendasi yang Realistis**
+   Fungsi membatasi jumlah film rekomendasi yang akan dikembalikan supaya tidak melebihi jumlah film yang ada di data (dikurangi 1 karena film yang direferensikan gak masuk rekomendasi).
+
+3. **Mencari Film yang Paling Mirip dengan Film Referensi**
+   Fungsi menggunakan metode `argpartition` pada array nilai similarity untuk menemukan film-film yang memiliki skor kemiripan tertinggi dengan film referensi. Metode ini lebih efisien daripada mengurutkan semua nilai similarity.
+
+4. **Mengambil Judul Film Film yang Paling Mirip**
+   Setelah menemukan indeks film-film dengan skor kemiripan tertinggi, fungsi mengambil judul film-film tersebut dari kolom matrix similarity.
+
+5. **Menghapus Film Referensi dari Daftar Rekomendasi**
+   Film referensi tidak dimasukkan ke dalam rekomendasi karena sudah pasti sama dengan film yang jadi acuan.
+
+6. **Menggabungkan Data Film dengan Info Genre**
+   Fungsi menggabungkan judul film-film yang direkomendasikan dengan data film asli (`items`) supaya hasil rekomendasi gak cuma judul, tapi juga menampilkan genre film.
+
+7. **Mengembalikan Data Frame Rekomendasi**
+   Fungsi mengembalikan sebuah DataFrame yang berisi film-film rekomendasi (judul dan genre) sebanyak `top_n` film yang paling mirip.
 
 ```python
 def movie_recommendations(title, similarity=cosine_sim_df, items=movie_merged[['title', 'genres']], top_n=5):
@@ -678,30 +701,6 @@ def movie_recommendations(title, similarity=cosine_sim_df, items=movie_merged[['
 
 Fungsi ini bertujuan untuk **memberikan rekomendasi film berdasarkan kemiripan genre film yang sudah ada**. Kemiripan ini dihitung menggunakan **cosine similarity**, yaitu sebuah metode yang mengukur seberapa mirip dua film berdasarkan fitur (dalam kasus ini genre) yang mereka miliki.
 
----
-
-### Proses utama yang terjadi di fungsi ini adalah:
-
-1. **Validasi Judul Film Input**
-   Fungsi mulai dengan memastikan film yang kamu masukkan sebagai referensi (`title`) ada di dalam data cosine similarity matrix. Kalau gak ada, fungsi langsung kasih error supaya kamu tahu film itu tidak tersedia untuk rekomendasi.
-
-2. **Penentuan Jumlah Rekomendasi yang Realistis**
-   Fungsi membatasi jumlah film rekomendasi yang akan dikembalikan supaya tidak melebihi jumlah film yang ada di data (dikurangi 1 karena film yang direferensikan gak masuk rekomendasi).
-
-3. **Mencari Film yang Paling Mirip dengan Film Referensi**
-   Fungsi menggunakan metode `argpartition` pada array nilai similarity untuk menemukan film-film yang memiliki skor kemiripan tertinggi dengan film referensi. Metode ini lebih efisien daripada mengurutkan semua nilai similarity.
-
-4. **Mengambil Judul Film Film yang Paling Mirip**
-   Setelah menemukan indeks film-film dengan skor kemiripan tertinggi, fungsi mengambil judul film-film tersebut dari kolom matrix similarity.
-
-5. **Menghapus Film Referensi dari Daftar Rekomendasi**
-   Film referensi tidak dimasukkan ke dalam rekomendasi karena sudah pasti sama dengan film yang jadi acuan.
-
-6. **Menggabungkan Data Film dengan Info Genre**
-   Fungsi menggabungkan judul film-film yang direkomendasikan dengan data film asli (`items`) supaya hasil rekomendasi gak cuma judul, tapi juga menampilkan genre film.
-
-7. **Mengembalikan Data Frame Rekomendasi**
-   Fungsi mengembalikan sebuah DataFrame yang berisi film-film rekomendasi (judul dan genre) sebanyak `top_n` film yang paling mirip.
 
 ---
 

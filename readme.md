@@ -553,7 +553,41 @@ matrix([[0.        , 0.        , 0.        , ..., 0.        , 0.        ,
 
 ### 2. **Membangun Matriks Similarity dengan Cosine Similarity**
 
-Selanjutnya, digunakan **cosine similarity** untuk menghitung tingkat kemiripan antar film berdasarkan representasi TF-IDF genre mereka:
+Selanjutnya, digunakan cosine similarity untuk mengukur tingkat kemiripan antara dua film berdasarkan representasi numerik dari genre mereka. Setiap film direpresentasikan dalam bentuk vektor yang menggambarkan genre-genre yang dimiliki, kemudian dihitung sudut kosinus antara vektor-vektor tersebut untuk menentukan seberapa mirip kedua film tersebut secara genre.
+
+```
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Menghitung cosine similarity pada matrix tf-idf
+cosine_sim = cosine_similarity(tfidf_matrix)
+cosine_sim
+```
+
+**Hasil Output :**
+```
+array([[1.        , 0.20956695, 0.35619879, ..., 0.56350998, 0.        ,
+        0.56350998],
+       [0.20956695, 1.        , 0.07464749, ..., 0.11809307, 0.        ,
+        0.11809307],
+       [0.35619879, 0.07464749, 1.        , ..., 0.20072157, 0.27165012,
+        0.20072157],
+       ...,
+       [0.56350998, 0.11809307, 0.20072157, ..., 1.        , 0.22602446,
+        1.        ],
+       [0.        , 0.        , 0.27165012, ..., 0.22602446, 1.        ,
+        0.22602446],
+       [0.56350998, 0.11809307, 0.20072157, ..., 1.        , 0.22602446,
+        1.        ]])
+```
+
+**Insight :**
+
+Matriks tersebut menunjukkan **kemiripan antar film berdasarkan genre** dalam bentuk nilai cosine similarity.
+
+* Nilai 1 berarti film sangat mirip (biasanya terhadap dirinya sendiri).
+* Nilai mendekati 0 berarti sangat tidak mirip.
+* Contoh: jika baris ke-0 dan kolom ke-3 bernilai 0.56, artinya film 0 dan film 3 punya genre yang cukup mirip.
+
 
 ```python
 from sklearn.metrics.pairwise import cosine_similarity
@@ -563,23 +597,38 @@ cosine_sim = cosine_similarity(tfidf_matrix)
 
 # Mengubah ke DataFrame untuk memudahkan interpretasi
 cosine_sim_df = pd.DataFrame(cosine_sim, index=movie_merged['title'], columns=movie_merged['title'])
+
+# Membuat dataframe dari variabel cosine_sim dengan baris dan kolom berupa judul movie
+cosine_sim_df = pd.DataFrame(cosine_sim, index=movie_merged['title'], columns=movie_merged['title'])
+print('Shape:', cosine_sim_df.shape)
+
+# Melihat similarity matrix pada setiap movie
+cosine_sim_df.sample(5, axis=1).sample(20, axis=0)
 ```
 
-| Title                    | Crime | Mystery | Adventure | Western | Action | Romance  | Comedy   | TV       | Animation | War | ... | Fiction  | Music | Foreign | Drama    | Horror   | Documentary | Thriller | Movie    | History  | Fantasy  |
-| ------------------------ | ----- | ------- | --------- | ------- | ------ | -------- | -------- | -------- | --------- | --- | --- | -------- | ----- | ------- | -------- | -------- | ----------- | -------- | -------- | -------- | -------- |
-| Rocky II                 | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 1.000000 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
-| Blood: The Last Vampire  | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.273601 | 0.000000 | 0.527989  | 0.0 | ... | 0.356970 | 0.0   | 0.0     | 0.000000 | 0.411889 | 0.0         | 0.282015 | 0.000000 | 0.000000 | 0.377268 |
-| Sunshine                 | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.617315 | 0.0   | 0.0     | 0.000000 | 0.000000 | 0.0         | 0.487694 | 0.000000 | 0.000000 | 0.000000 |
-| The Man in the Iron Mask | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.886646 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 0.462450 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
-| Jurassic Park            | 0.0   | 0.0     | 0.525762  | 0.0     | 0.0    | 0.000000 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.601488 | 0.0   | 0.0     | 0.000000 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
-| Anatomy of Hell          | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 1.000000 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
-| Grill Point              | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.826109 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 0.563510 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
-| Beauty and the Beast     | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.647703 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 0.337824 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.682902 |
-| D.E.B.S.                 | 0.0   | 0.0     | 0.000000  | 0.0     | 1.0    | 0.000000 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 0.000000 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
-| Longitude                | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.000000 | 0.596711 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 0.180865 | 0.000000 | 0.0         | 0.000000 | 0.596711 | 0.505134 | 0.000000 |
+| title                      | The Day After Tomorrow | xXx      | Hot Fuzz | My Name Is Bruce | Sissi   |
+|----------------------------|------------------------|----------|----------|------------------|---------|
+| Sissi                      | 0.000000               | 0.000000 | 0.297876 | 0.310492         | 1.000000|
+| The Prize                  | 0.000000               | 0.000000 | 0.353255 | 0.000000         | 0.123619|
+| Tibet: Cry of the Snow Lion| 0.000000               | 0.000000 | 0.000000 | 0.000000         | 0.000000|
+| Roustabout                 | 0.000000               | 0.000000 | 0.000000 | 0.000000         | 0.498377|
+| Mothra vs. Godzilla        | 0.799149               | 0.468825 | 0.218003 | 0.000000         | 0.000000|
+| Copying Beethoven          | 0.000000               | 0.000000 | 0.000000 | 0.000000         | 0.382776|
+| Ocean's Eleven             | 0.149648               | 0.210092 | 0.472830 | 0.204880         | 0.207783|
+| Uncle Buck                 | 0.000000               | 0.000000 | 0.241166 | 0.251379         | 0.373564|
+| Live and Let Die           | 0.712297               | 1.000000 | 0.324100 | 0.000000         | 0.000000|
+| Dave Chappelle Block Party | 0.000000               | 0.000000 | 0.179346 | 0.186941         | 0.189590|
+| Italian for Beginners      | 0.000000               | 0.000000 | 0.297876 | 0.310492         | 1.000000|
+| 48 Hrs.                    | 0.372390               | 0.522802 | 0.836099 | 0.245574         | 0.364938|
+| The Other Side of the Bed  | 0.000000               | 0.000000 | 0.000000 | 0.000000         | 0.827713|
+| Jacob's Ladder             | 0.000000               | 0.000000 | 0.000000 | 0.543575         | 0.113181|
+| Madagascar                 | 0.000000               | 0.000000 | 0.000000 | 0.000000         | 0.000000|
+| Dr. Jekyll and Mr. Hyde    | 0.522808               | 0.000000 | 0.000000 | 0.506227         | 0.105405|
+| Bonnie and Clyde           | 0.000000               | 0.000000 | 0.545493 | 0.000000         | 0.190891|
+
 
 > **Insight:**
-> Representasi TF-IDF menunjukkan bahwa setiap film memiliki bobot yang berbeda-beda terhadap setiap genre, mencerminkan seberapa relevan genre tersebut dengan filmnya. Nilai yang tinggi pada suatu genre menunjukkan bahwa genre tersebut sangat dominan dalam film tersebut, dan ini memungkinkan sistem untuk mengukur kemiripan antar film secara matematis meskipun judulnya berbeda total. Misalnya, film Beauty and the Beast sangat kuat di genre Romance dan Fantasy, sehingga akan direkomendasikan bersama film lain yang memiliki pola genre serupa.
+Dari matrix similarity ini, terlihat bahwa film *Sissi* memiliki nilai kemiripan tertinggi dengan dirinya sendiri (nilai 1), yang wajar. Beberapa film lain seperti *Italian for Beginners* juga menunjukkan kemiripan cukup tinggi dengan *Sissi*, sedangkan film-film lain seperti *The Day After Tomorrow* atau *xXx* memiliki nilai kemiripan yang sangat rendah dengan *Sissi*. Ini menunjukkan bahwa sistem rekomendasi lebih cenderung mengaitkan film yang genre atau kontennya mirip secara spesifik, sehingga rekomendasi yang diberikan kemungkinan relevan dengan preferensi film yang dijadikan referensi.
 
 ---
 

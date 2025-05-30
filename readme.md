@@ -478,6 +478,28 @@ Kode ini mengekstrak semua genre unik dari kolom `genres` pada `movie_merged`, m
 
 ## **Model Development: Content-Based Filtering menggunakan TF-IDF Vectorizer**
 
+Untuk membangun sistem rekomendasi film berbasis konten, pendekatan yang digunakan adalah **content-based filtering**, yang merekomendasikan film berdasarkan kemiripan kontennya — dalam hal ini adalah **genre**. Langkah-langkah pengembangannya dijelaskan sebagai berikut:
+
+### **TF-IDF Vectorizer**
+
+Pertama-tama, informasi genre dari setiap film diubah menjadi representasi numerik menggunakan **TF-IDF (Term Frequency - Inverse Document Frequency)**. TF-IDF adalah teknik yang sering digunakan dalam pemrosesan teks untuk merepresentasikan seberapa penting suatu kata (dalam hal ini, genre) dalam suatu dokumen (film) dibandingkan dengan seluruh kumpulan dokumen (film-film lain).
+
+* **Term Frequency (TF)** mengukur seberapa sering suatu genre muncul dalam data film tersebut.
+* **Inverse Document Frequency (IDF)** menurunkan bobot genre yang terlalu umum (misalnya "drama" mungkin muncul di banyak film), sehingga genre yang lebih unik mendapat bobot lebih tinggi.
+
+Hasil dari proses ini adalah **matriks TF-IDF**, di mana setiap baris merepresentasikan satu film dan setiap kolom mewakili satu genre. Nilai-nilai dalam matriks ini menunjukkan seberapa kuat keterkaitan film tersebut dengan masing-masing genre.
+
+### **Cosine Similarity**
+
+Setelah setiap film direpresentasikan sebagai vektor TF-IDF, langkah berikutnya adalah mengukur tingkat kemiripan antar film. Untuk ini digunakan **cosine similarity**, yaitu ukuran kesamaan antara dua vektor berdasarkan sudut di antara mereka.
+
+* Nilai cosine similarity berkisar antara **0** (tidak mirip sama sekali) hingga **1** (sangat mirip).
+* Dua film dianggap mirip jika genre-nya memiliki distribusi yang serupa dalam representasi TF-IDF mereka.
+
+Dengan menggunakan cosine similarity, sistem dapat mencari film yang paling dekat (mirip) vektornya dengan film input, dan merekomendasikannya ke pengguna.
+
+---
+
 ### 1. **Inisialisasi TF-IDF Vectorizer**
 
 Langkah pertama adalah mengubah teks pada kolom `genres` menjadi representasi numerik menggunakan **TF-IDF (Term Frequency - Inverse Document Frequency)**. Proses ini bertujuan untuk mengetahui seberapa penting suatu genre (seperti *action*, *drama*, *comedy*, dll.) dalam keseluruhan kumpulan data film:
@@ -536,8 +558,21 @@ cosine_sim = cosine_similarity(tfidf_matrix)
 cosine_sim_df = pd.DataFrame(cosine_sim, index=movie_merged['title'], columns=movie_merged['title'])
 ```
 
+| Title                    | Crime | Mystery | Adventure | Western | Action | Romance  | Comedy   | TV       | Animation | War | ... | Fiction  | Music | Foreign | Drama    | Horror   | Documentary | Thriller | Movie    | History  | Fantasy  |
+| ------------------------ | ----- | ------- | --------- | ------- | ------ | -------- | -------- | -------- | --------- | --- | --- | -------- | ----- | ------- | -------- | -------- | ----------- | -------- | -------- | -------- | -------- |
+| Rocky II                 | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 1.000000 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
+| Blood: The Last Vampire  | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.273601 | 0.000000 | 0.527989  | 0.0 | ... | 0.356970 | 0.0   | 0.0     | 0.000000 | 0.411889 | 0.0         | 0.282015 | 0.000000 | 0.000000 | 0.377268 |
+| Sunshine                 | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.617315 | 0.0   | 0.0     | 0.000000 | 0.000000 | 0.0         | 0.487694 | 0.000000 | 0.000000 | 0.000000 |
+| The Man in the Iron Mask | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.886646 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 0.462450 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
+| Jurassic Park            | 0.0   | 0.0     | 0.525762  | 0.0     | 0.0    | 0.000000 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.601488 | 0.0   | 0.0     | 0.000000 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
+| Anatomy of Hell          | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 1.000000 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
+| Grill Point              | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.826109 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 0.563510 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
+| Beauty and the Beast     | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.647703 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 0.337824 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.682902 |
+| D.E.B.S.                 | 0.0   | 0.0     | 0.000000  | 0.0     | 1.0    | 0.000000 | 0.000000 | 0.000000 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 0.000000 | 0.000000 | 0.0         | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
+| Longitude                | 0.0   | 0.0     | 0.000000  | 0.0     | 0.0    | 0.000000 | 0.000000 | 0.596711 | 0.000000  | 0.0 | ... | 0.000000 | 0.0   | 0.0     | 0.180865 | 0.000000 | 0.0         | 0.000000 | 0.596711 | 0.505134 | 0.000000 |
+
 > **Insight:**
-> Nilai cosine similarity mendekati 1 menunjukkan film yang sangat mirip berdasarkan genre, sedangkan nilai mendekati 0 menunjukkan film yang tidak mirip. Matriks ini menjadi dasar dalam sistem rekomendasi film berbasis genre.
+> Representasi TF-IDF menunjukkan bahwa setiap film memiliki bobot yang berbeda-beda terhadap setiap genre, mencerminkan seberapa relevan genre tersebut dengan filmnya. Nilai yang tinggi pada suatu genre menunjukkan bahwa genre tersebut sangat dominan dalam film tersebut, dan ini memungkinkan sistem untuk mengukur kemiripan antar film secara matematis meskipun judulnya berbeda total. Misalnya, film Beauty and the Beast sangat kuat di genre Romance dan Fantasy, sehingga akan direkomendasikan bersama film lain yang memiliki pola genre serupa.
 
 ---
 
@@ -546,12 +581,73 @@ cosine_sim_df = pd.DataFrame(cosine_sim, index=movie_merged['title'], columns=mo
 Fungsi berikut dibuat untuk menghasilkan rekomendasi film berdasarkan judul film yang dimasukkan:
 
 ```python
-def movie_recommendations(title, similarity=cosine_sim_df, items=movie_merged[['title', 'genres']], k=5):
-    index = similarity.loc[:, title].to_numpy().argpartition(range(-1, -k, -1)).flatten()
-    most_similiar = similarity.columns[index[-1:-(k+2):-1]]
-    most_similiar = most_similiar.drop(title, errors='ignore')
-    return pd.DataFrame(most_similiar).merge(items).head(k)
+def movie_recommendations(title, similarity=cosine_sim_df, items=movie_merged[['title', 'genres']], top_n=5):
+    """
+    Rekomendasi movie berdasarkan kemiripan genre menggunakan cosine similarity.
+    
+    Parameters:
+    - title (str): Judul film yang dijadikan referensi.
+    - similarity (DataFrame): Matrix cosine similarity antar film.
+    - items (DataFrame): Dataframe berisi informasi judul dan genre film.
+    - top_n (int): Jumlah rekomendasi film yang dihasilkan.
+    
+    Returns:
+    - DataFrame: Rekomendasi film beserta genrenya.
+    """
+    if title not in similarity.columns:
+        raise ValueError(f"Title '{title}' tidak ditemukan di similarity matrix.")
+
+    # Batas maksimum rekomendasi yang masuk akal (tidak termasuk dirinya sendiri)
+    top_n = min(top_n, similarity.shape[0] - 1)
+
+    # Cari index film paling mirip (dengan argpartition untuk efisiensi)
+    index = similarity.loc[:, title].to_numpy().argpartition(range(-1, -top_n-1, -1)).flatten()
+    most_similar = similarity.columns[index[-1:-(top_n+2):-1]]
+
+    # Hapus film itu sendiri dari hasil rekomendasi
+    most_similar = most_similar.drop(title, errors='ignore')
+
+    return (
+        pd.DataFrame(most_similar, columns=['title'])
+        .merge(items.drop_duplicates('title'), on='title')
+        .head(top_n)
+    )
 ```
+
+>Oke, saya jelasin kesimpulannya dengan lebih lengkap dan detail ya, supaya kamu benar-benar paham gimana cara kerja fungsi ini.
+
+---
+
+## Kesimpulan Fungsi `movie_recommendations`
+
+Fungsi ini bertujuan untuk **memberikan rekomendasi film berdasarkan kemiripan genre film yang sudah ada**. Kemiripan ini dihitung menggunakan **cosine similarity**, yaitu sebuah metode yang mengukur seberapa mirip dua film berdasarkan fitur (dalam kasus ini genre) yang mereka miliki.
+
+---
+
+### Proses utama yang terjadi di fungsi ini adalah:
+
+1. **Validasi Judul Film Input**
+   Fungsi mulai dengan memastikan film yang kamu masukkan sebagai referensi (`title`) ada di dalam data cosine similarity matrix. Kalau gak ada, fungsi langsung kasih error supaya kamu tahu film itu tidak tersedia untuk rekomendasi.
+
+2. **Penentuan Jumlah Rekomendasi yang Realistis**
+   Fungsi membatasi jumlah film rekomendasi yang akan dikembalikan supaya tidak melebihi jumlah film yang ada di data (dikurangi 1 karena film yang direferensikan gak masuk rekomendasi).
+
+3. **Mencari Film yang Paling Mirip dengan Film Referensi**
+   Fungsi menggunakan metode `argpartition` pada array nilai similarity untuk menemukan film-film yang memiliki skor kemiripan tertinggi dengan film referensi. Metode ini lebih efisien daripada mengurutkan semua nilai similarity.
+
+4. **Mengambil Judul Film Film yang Paling Mirip**
+   Setelah menemukan indeks film-film dengan skor kemiripan tertinggi, fungsi mengambil judul film-film tersebut dari kolom matrix similarity.
+
+5. **Menghapus Film Referensi dari Daftar Rekomendasi**
+   Film referensi tidak dimasukkan ke dalam rekomendasi karena sudah pasti sama dengan film yang jadi acuan.
+
+6. **Menggabungkan Data Film dengan Info Genre**
+   Fungsi menggabungkan judul film-film yang direkomendasikan dengan data film asli (`items`) supaya hasil rekomendasi gak cuma judul, tapi juga menampilkan genre film.
+
+7. **Mengembalikan Data Frame Rekomendasi**
+   Fungsi mengembalikan sebuah DataFrame yang berisi film-film rekomendasi (judul dan genre) sebanyak `top_n` film yang paling mirip.
+
+---
 
 Contoh penggunaan:
 
@@ -572,6 +668,93 @@ movie_recommendations("Man's Favorite Sport?")
 > **Insight:**
 > Sistem rekomendasi berhasil memberikan daftar film yang memiliki genre serupa dengan film input, dalam hal ini *Man's Favorite Sport?*. Hal ini menunjukkan bahwa genre dapat menjadi indikator kuat dalam menentukan kemiripan konten antar film.
 
+Contoh penggunaan function movie_recommendation dengan top_n = 10 dengan judul 'Beauty and The Beast' :
+```
+movie_recommendations('Beauty and the Beast', top_n = 10)
+```
+
+**Output Rekomendasi :***
+|    | Title                                         | Genres                                 		  |
+|----|-----------------------------------------------|----------------------------------------------------|
+| 0  | Jurassic Park                                 | Adventure \| Science Fiction          		  |
+| 1  | The Golem: How He Came Into the World         | Horror \| Science Fiction \| Thriller 		  |
+| 2  | Armageddon                                    | Action \| Thriller \| Science Fiction \| Adventure |
+| 3  | The Hours                                     | Drama                                 		  |
+| 4  | The Getaway                                   | Drama \| Action \| Thriller           		  |
+| 5  | Grill Point                                   | Comedy \| Drama                        		  |
+| 6  | Love Is the Devil: Study for a Portrait of Fra... | TV Movie \| Drama                     	  |
+| 7  | The Last Laugh                                | Drama                                 	  	  |
+| 8  | The Tunnel                                    | Science Fiction                      		  |
+| 9  | Tough Enough                                  | Drama \| Thriller                      		  |
+
+> Tabel ini berisi daftar film beserta genre-nya yang bisa digunakan sebagai dasar untuk sistem rekomendasi film berbasis genre. Dengan menggunakan *top\_n = 10*, artinya sistem akan merekomendasikan 10 film paling mirip berdasarkan kesamaan genre dengan film referensi. Genre campuran seperti “Adventure | Science Fiction” atau “Drama | Action | Thriller” menunjukkan bahwa film-film ini bisa memiliki overlap genre yang kompleks, sehingga cosine similarity dapat menangkap tingkat kemiripan yang lebih detail daripada hanya mencocokkan genre tunggal. Ini memungkinkan rekomendasi yang lebih relevan dan beragam bagi pengguna.
+
+---
+
+## **Kelebihan Content-Based Filtering**
+
+1. **Personalisasi tinggi**
+
+   Rekomendasi disesuaikan dengan preferensi unik setiap pengguna berdasarkan item yang pernah mereka sukai.
+   *Contoh:* Jika seorang pengguna menyukai film *Inception* karena bergenre Sci-Fi dan Thriller, maka sistem akan merekomendasikan film seperti *Interstellar* atau *Tenet* yang memiliki genre serupa.
+
+2. **Tidak butuh data dari pengguna lain**
+
+   Sistem hanya mengandalkan informasi dari item (misalnya genre film), sehingga cocok digunakan saat jumlah pengguna masih sedikit (*cold start for user*).
+   *Contoh:* Sistem tetap bisa bekerja meski hanya ada satu pengguna karena cukup melihat genre film yang disukai.
+
+3. **Tahan terhadap serangan manipulasi user**
+
+   Karena tidak bergantung pada rating dari banyak pengguna, sistem ini relatif aman dari spam atau rating palsu.
+   *Contoh:* Tidak terpengaruh jika ada banyak akun palsu yang memberi rating tinggi ke film tertentu.
+
+---
+
+## **Kekurangan Content-Based Filtering**
+
+1. **Rekomendasi cenderung sempit (kurang variatif)**
+
+   Hanya merekomendasikan item yang sangat mirip, sehingga pengguna bisa merasa terjebak dalam "filter bubble".
+   *Contoh:* Jika pengguna suka film horor, sistem hanya akan merekomendasikan horor terus-menerus, meskipun mungkin ia juga akan suka thriller atau mystery.
+
+2. **Sulit menangkap selera kompleks**
+
+   Jika preferensi pengguna mencakup banyak genre atau aspek lain (seperti sutradara atau alur cerita), pendekatan ini bisa kurang fleksibel.
+   *Contoh:* Seorang pengguna menyukai *The Dark Knight* bukan hanya karena genre-nya, tapi juga karena sutradaranya (Christopher Nolan), namun sistem hanya melihat genre "Action" dan "Crime".
+
+3. **Ketergantungan pada representasi fitur konten**
+
+   Jika fitur kontennya tidak lengkap atau tidak akurat, maka kualitas rekomendasinya akan menurun.
+   *Contoh:* Jika informasi genre sebuah film tidak ditulis lengkap, maka sistem tidak bisa memberikan rekomendasi yang tepat.
+
+---
+
+# Evaluation
+
+Metrik evaluasi yang digunakan untuk menilai performa model **content-based filtering** dalam sistem rekomendasi meliputi **Precision@k**, **Recall@k**, dan **F1-Score@k**. Ketiga metrik ini termasuk dalam kategori evaluasi berbasis relevansi, yang umum digunakan dalam sistem rekomendasi.
+
+1. **Precision@k**  
+Precision@k digunakan untuk mengetahui seberapa besar proporsi item yang relevan dari total *k item* yang direkomendasikan oleh sistem. Metrik ini menunjukkan tingkat **ketepatan** sistem dalam memberikan rekomendasi.
+
+$$
+\text{Precision@k} = \frac{\text{Jumlah item relevan dalam rekomendasi}}{k}
+$$
+
+2. **Recall@k**  
+Recall@k mengukur berapa banyak item relevan yang berhasil ditemukan dari keseluruhan item relevan yang tersedia. Metrik ini menunjukkan **kelengkapan** sistem dalam memberikan rekomendasi.
+
+$$
+\text{Recall@k} = \frac{\text{Jumlah item relevan dalam rekomendasi}}{\text{Jumlah total item relevan}}
+$$
+
+3. **F1-Score@k**  
+F1-Score@k adalah **rata-rata harmonik** dari Precision@k dan Recall@k. Metrik ini digunakan untuk mengevaluasi keseimbangan antara ketepatan dan kelengkapan sistem rekomendasi.
+
+$$
+\text{F1-Score@k} = \frac{2 \times \text{Precision@k} \times \text{Recall@k}}{\text{Precision@k} + \text{Recall@k}}
+$$
+
+---
 # **Problem Answers**
 
 ---

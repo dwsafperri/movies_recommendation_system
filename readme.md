@@ -339,6 +339,8 @@ ratings['movieId'] = ratings['movieId'].astype(str)
 df.info()
 ratings.info()
 ```
+**Hasil Output :**
+
 ```
 <class 'pandas.core.frame.DataFrame'>
 Index: 10000 entries, 43526 to 27147
@@ -374,6 +376,8 @@ Kolom `movieId` pada dataframe `df` dan `ratings` diubah menjadi string agar kon
 movie_merged = pd.merge(ratings, df, on='movieId', how="inner")
 movie_merged
 ```
+
+**Hasil Output :**
 
 ```
 	userId	movieId	rating	timestamp	title	genres
@@ -421,10 +425,10 @@ Tidak terdapat missing values dalam data `movie_merged`.
 ```python
 movie_merged.duplicated().sum()
 ```
-```
-Output :
+
+**Hasil Output :**
 np.int64(0)
-```
+
 **Insight :**
 Tidak terdapat data duplikat dalam `movie_merged`.
 

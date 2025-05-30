@@ -1,3 +1,7 @@
+# Movies Recommendation System Report
+
+---
+
 # **Project Overview**
 
 Dengan terus bertambahnya jumlah film yang tersedia di berbagai platform digital, pengguna sering kesulitan menemukan film yang sesuai dengan selera mereka. Salah satu pendekatan populer untuk mengatasi permasalahan ini adalah sistem rekomendasi berbasis konten (*content-based filtering*), di mana rekomendasi diberikan berdasarkan kesamaan karakteristik konten — dalam hal ini, genre film.
@@ -32,8 +36,7 @@ Sistem ini relevan karena membantu pengguna mengeksplorasi film yang mungkin bel
 
 # **Data Understanding**
 
-**Link Dataset:**  
-https://www.kaggle.com/api/v1/datasets/download/rounakbanik/the-movies-dataset
+Tahap *Data Understanding* bertujuan untuk mengenal struktur, isi, dan karakteristik data yang akan digunakan. Dalam proyek ini, digunakan dua dataset utama dari [Kaggle - The Movies Dataset](https://www.kaggle.com/api/v1/datasets/download/rounakbanik/the-movies-dataset), yaitu `ratings.csv` dan `movies_metadata.csv`. Proses understanding mencakup membaca data, memeriksa struktur kolom dan tipe datanya, serta melakukan eksplorasi awal seperti statistik deskriptif untuk mengidentifikasi pola umum, missing values, dan anomali. Karena ukuran dataset cukup besar, dilakukan *sampling* sebanyak 10.000 baris untuk masing-masing file guna mempercepat proses eksplorasi dan pengolahan selanjutnya.
 
 ## **Dataset: Ratings**
 
@@ -144,6 +147,8 @@ movies.describe()
 | vote\_count   | Rata-rata 107, tapi distribusi sangat skewed. Banyak film dengan vote sedikit, hanya sedikit film yang sangat populer (hingga 12.269). |
 
 ## **3. Exploratory Data Analysis**
+
+Exploratory Data Analysis (EDA) dilakukan untuk memahami pola, anomali, serta hubungan antar fitur dalam dataset sebelum masuk ke tahap pemodelan. Dalam proses ini, dilakukan visualisasi distribusi data seperti rating film, tahun rilis, durasi, hingga korelasi antar fitur numerik. EDA juga membantu dalam pengambilan keputusan terhadap data mana yang perlu dibersihkan, difilter, atau dipertahankan.
 
 ### **a. Distribusi Rating**
 
@@ -282,6 +287,8 @@ movies.describe()
 ---
 
 ## **4. Data Preparation**
+
+Sebelum dilakukan analisis atau pemodelan lebih lanjut, data perlu dibersihkan dan disiapkan. Tahapan ini meliputi konversi format data, merge antar tabel, mengatasi missing value, outlier, dan menyiapkan fitur agar siap dianalisis.
 
 ### **a. Mengubah Dictionary menjadi String**
 
@@ -614,10 +621,6 @@ def movie_recommendations(title, similarity=cosine_sim_df, items=movie_merged[['
     )
 ```
 
->Oke, saya jelasin kesimpulannya dengan lebih lengkap dan detail ya, supaya kamu benar-benar paham gimana cara kerja fungsi ini.
-
----
-
 ## Kesimpulan Fungsi `movie_recommendations`
 
 Fungsi ini bertujuan untuk **memberikan rekomendasi film berdasarkan kemiripan genre film yang sudah ada**. Kemiripan ini dihitung menggunakan **cosine similarity**, yaitu sebuah metode yang mengukur seberapa mirip dua film berdasarkan fitur (dalam kasus ini genre) yang mereka miliki.
@@ -729,32 +732,92 @@ movie_recommendations('Beauty and the Beast', top_n = 10)
 
 ---
 
-# Evaluation
+Tentu! Berikut adalah versi **parafrase** dari bagian evaluasi yang kamu tulis, tetap dengan makna yang sama namun dengan gaya bahasa yang berbeda dan tetap akademis:
 
-Metrik evaluasi yang digunakan untuk menilai performa model **content-based filtering** dalam sistem rekomendasi meliputi **Precision@k**, **Recall@k**, dan **F1-Score@k**. Ketiga metrik ini termasuk dalam kategori evaluasi berbasis relevansi, yang umum digunakan dalam sistem rekomendasi.
+---
 
-1. **Precision@k**  
-Precision@k digunakan untuk mengetahui seberapa besar proporsi item yang relevan dari total *k item* yang direkomendasikan oleh sistem. Metrik ini menunjukkan tingkat **ketepatan** sistem dalam memberikan rekomendasi.
+## **Evaluasi**
+
+Untuk menilai kinerja dari model **content-based filtering** dalam sistem rekomendasi film ini, digunakan tiga metrik utama yang berbasis relevansi, yaitu **Precision\@k**, **Recall\@k**, dan **F1-Score\@k**. Ketiga metrik ini umum digunakan dalam evaluasi sistem rekomendasi karena dapat mengukur seberapa tepat dan lengkap rekomendasi yang diberikan.
+
+1. **Precision\@k**
+   Precision\@k mengukur seberapa banyak item yang benar-benar relevan di antara *k item* teratas yang direkomendasikan oleh sistem. Metrik ini menggambarkan **tingkat akurasi** rekomendasi.
 
 $$
 \text{Precision@k} = \frac{\text{Jumlah item relevan dalam rekomendasi}}{k}
 $$
 
-2. **Recall@k**  
-Recall@k mengukur berapa banyak item relevan yang berhasil ditemukan dari keseluruhan item relevan yang tersedia. Metrik ini menunjukkan **kelengkapan** sistem dalam memberikan rekomendasi.
+2. **Recall\@k**
+   Recall\@k menunjukkan sejauh mana sistem berhasil menemukan item yang relevan dari seluruh item relevan yang ada. Artinya, metrik ini menilai **cakupan** dari sistem rekomendasi.
 
 $$
 \text{Recall@k} = \frac{\text{Jumlah item relevan dalam rekomendasi}}{\text{Jumlah total item relevan}}
 $$
 
-3. **F1-Score@k**  
-F1-Score@k adalah **rata-rata harmonik** dari Precision@k dan Recall@k. Metrik ini digunakan untuk mengevaluasi keseimbangan antara ketepatan dan kelengkapan sistem rekomendasi.
+3. **F1-Score\@k**
+   F1-Score\@k merupakan kombinasi dari Precision dan Recall dalam bentuk rata-rata harmonik. Metrik ini digunakan untuk menilai **keseimbangan antara ketepatan dan kelengkapan** dalam hasil rekomendasi.
 
 $$
 \text{F1-Score@k} = \frac{2 \times \text{Precision@k} \times \text{Recall@k}}{\text{Precision@k} + \text{Recall@k}}
 $$
 
 ---
+
+```
+# data ground truth (film relevan yang disukai user)
+ground_truth = {
+    "Live and Let Die": {"The Getaway", "Dr. Jekyll and Mr. Hyde", "Big Fish"},
+}
+
+def evaluate_recommendation(ground_truth, k=5):
+    precision_list = []
+    recall_list = []
+    f1_list = []
+
+    for title, relevant_set in ground_truth.items():
+        # Ambil rekomendasi film dari fungsi kamu
+        recommended_df = movie_recommendations(title, top_n=k)
+        recommended = set(recommended_df['title'])
+        
+        true_positives = recommended & relevant_set
+        
+        precision = len(true_positives) / k if k > 0 else 0
+        recall = len(true_positives) / len(relevant_set) if len(relevant_set) > 0 else 0
+        if precision + recall == 0:
+            f1 = 0
+        else:
+            f1 = 2 * precision * recall / (precision + recall)
+        
+        precision_list.append(precision)
+        recall_list.append(recall)
+        f1_list.append(f1)
+    
+    print(f"Average Precision@{k}: {sum(precision_list)/len(precision_list):.2f}")
+    print(f"Average Recall@{k}: {sum(recall_list)/len(recall_list):.2f}")
+    print(f"Average F1-Score@{k}: {sum(f1_list)/len(f1_list):.2f}")
+    print("Relevant Movies :", list(true_positives))
+
+evaluate_recommendation(ground_truth, k=5)
+```
+
+**Hasil Output :**
+```
+Average Precision@5: 0.60
+Average Recall@5: 1.00
+Average F1-Score@5: 0.75
+Relevant Movies : ['The Getaway', 'Dr. Jekyll and Mr. Hyde', 'Big Fish']
+```
+
+**Insight :**
+
+- **Precision@5 sebesar 0.60** menunjukkan bahwa dari lima film yang direkomendasikan oleh sistem, rata-rata tiga film di antaranya merupakan film yang relevan atau sesuai dengan preferensi pengguna. Dengan kata lain, 60% rekomendasi yang diberikan tepat sasaran.
+
+- **Recall@5 sebesar 1.00** mengindikasikan bahwa semua film yang dianggap relevan (berdasarkan data ground truth) berhasil direkomendasikan oleh sistem dalam lima rekomendasi teratas. Ini menunjukkan bahwa sistem memiliki kemampuan yang sangat baik dalam menemukan semua item relevan yang tersedia.
+
+- **F1-Score@5 sebesar 0.75** merupakan nilai rata-rata harmonik dari precision dan recall, yang mencerminkan keseimbangan yang baik antara ketepatan dan kelengkapan rekomendasi yang diberikan oleh sistem.
+
+---
+
 # **Problem Answers**
 
 ---
@@ -862,10 +925,6 @@ Film seperti Grill Point, Tough Enough, dan Big Fish direkomendasikan karena mem
 ---
 
 ## **Referensi**
-
-* Adomavicius, G., & Tuzhilin, A. (2005). Toward the next generation of recommender systems: A survey of the state-of-the-art and possible extensions. *IEEE Transactions on Knowledge and Data Engineering, 17(6), 734–749*. [https://doi.org/10.1109/TKDE.2005.99](https://doi.org/10.1109/TKDE.2005.99)
-
-* Lops, P., De Gemmis, M., & Semeraro, G. (2011). Content-based recommender systems: State of the art and trends. In *Recommender Systems Handbook* (pp. 73–105). Springer. [https://doi.org/10.1007/978-0-387-85820-3\_3](https://doi.org/10.1007/978-0-387-85820-3_3)
 
 * Ricci, F., Rokach, L., & Shapira, B. (2011). Introduction to recommender systems handbook. In *Recommender Systems Handbook* (pp. 1–35). Springer. [https://doi.org/10.1007/978-0-387-85820-3\_1](https://doi.org/10.1007/978-0-387-85820-3_1)
 

@@ -887,7 +887,7 @@ Dengan menghitung **cosine similarity** dari representasi TF-IDF genre, kita bis
 def test_movie_recommendation():
     title_input = input("Masukkan judul film yang ingin direkomendasikan film miripnya: ")
     try:
-        recommendations = movie_recommendations(title_input, k=5)
+        recommendations = movie_recommendations(title_input, top_n=5)
         print(f"\nRekomendasi film mirip dengan '{title_input}':\n")
         print(recommendations[['title', 'genres']])
     except KeyError:

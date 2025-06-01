@@ -233,17 +233,23 @@ Exploratory Data Analysis (EDA) dilakukan untuk memahami pola, anomali, serta hu
 
 **Insight :**
 
-| Fitur 1        | Fitur 2          | Korelasi  | Interpretasi                                                                 |
-| -------------- | ---------------- | --------- | ---------------------------------------------------------------------------- |
-| `runtime`      | `release_year`   | **0.09**  | Korelasi sangat lemah, film modern sedikit lebih panjang, tapi tidak signifikan. |
-| `runtime`      | `average_rating` | **-0.06** | Durasi film tidak berpengaruh signifikan terhadap rating.                   |
-| `release_year` | `average_rating` | **0.02**  | Film lama dan baru punya peluang yang sama untuk disukai.                   |
-| `rating_count` | `average_rating` | **0.04**  | Jumlah rating tidak berkaitan kuat dengan kualitas film.                    |
-| `runtime`      | `rating_count`   | **0.02**  | Durasi tidak berkorelasi dengan banyaknya penonton.                         |
+* Semua fitur numerik memiliki **korelasi rendah (|r| < 0.2)**.
+* Artinya: **tidak ada hubungan linear yang kuat** antar fitur numerik.
+* Ini menunjukkan bahwa:
 
-- Tidak ada korelasi linear kuat antar fitur numerik.
-- Popularitas ≠ Kualitas.
-- Durasi atau tahun rilis bukan penentu utama kesuksesan film.
+  * Popularitas (jumlah rating) **tidak selalu beriringan** dengan kualitas (rating rata-rata).
+  * Durasi film **bukan indikator utama** apakah film disukai atau tidak.
+  * Tahun rilis juga **bukan penentu utama** nilai atau popularitas film.
+
+Tabel Interpretasi Korelasi
+
+| Fitur 1        | Fitur 2          | Korelasi | Interpretasi                                                                                                      |
+| -------------- | ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `runtime`      | `release_year`   | 0.09     | Korelasi sangat lemah dan positif — film modern cenderung sedikit lebih panjang durasinya, tapi tidak signifikan. |
+| `runtime`      | `average_rating` | -0.06    | Korelasi sangat lemah dan negatif — durasi film **tidak berpengaruh signifikan** terhadap rating.                 |
+| `release_year` | `average_rating` | 0.02     | Hampir tidak ada hubungan — film lama atau baru punya peluang yang sama untuk disukai.                            |
+| `rating_count` | `average_rating` | 0.04     | Hampir tidak ada korelasi — banyaknya orang yang memberi rating **tidak menjamin film disukai**.                  |
+| `runtime`      | `rating_count`   | 0.02     | Tidak ada hubungan berarti antara panjang film dan seberapa banyak orang menontonnya.                             |
 
 ---
 
@@ -255,24 +261,34 @@ Exploratory Data Analysis (EDA) dilakukan untuk memahami pola, anomali, serta hu
 
 **Insight :**
 
-1. **Minions** adalah film paling populer dengan selisih sangat besar.
-2. **Big Hero 6** berada di posisi ke-2, jauh di atas posisi ke-3 (Pulp Fiction).
-3. **Genre bervariasi**:
-   - Animasi dan keluarga: *Minions*, *Big Hero 6*
-   - Aksi/superhero: *The Dark Knight*, *John Wick*
-   - Drama/klasik: *Pulp Fiction*, *The Shawshank Redemption*
-4. **Film Lama Tetap Populer**
-   - Seperti *Pulp Fiction* dan *Shawshank Redemption*.
+1. **Minions** menjadi film **paling populer secara mencolok**, dengan selisih yang sangat besar dibandingkan film lainnya. Ini menunjukkan keberhasilan luar biasa dalam menjangkau audiens, kemungkinan karena:
 
-**Insight Tambahan**  
-- **Popularitas ≠ Rating Tinggi**  
-  Contoh: *Minions* populer tapi belum tentu punya rating tertinggi secara kritis.
+   * Segmentasi keluarga dan anak-anak.
+   * Visual animasi yang menarik.
+   * Strategi pemasaran besar-besaran secara global.
+
+2. **Wonder Woman** dan **Beauty and the Beast** menyusul di peringkat ke-2 dan ke-3 dengan popularitas yang cukup tinggi, namun **masih jauh di bawah Minions**. Ini menunjukkan minat besar pada genre **superhero dan fantasi-musikal**.
+
+3. Beberapa film dalam daftar didominasi oleh genre:
+
+   * **Animasi dan keluarga**: `Minions`, `Big Hero 6`.
+   * **Aksi dan petualangan**: `Wonder Woman`, `John Wick`, `Baby Driver`, `Deadpool`, `Avatar`.
+   * **Drama dan misteri**: `Gone Girl`.
+
+4. Film **Gone Girl** menempati posisi ke-10, dengan popularitas yang lebih rendah dari yang lain, namun tetap masuk 10 besar — menunjukkan bahwa genre thriller psikologis juga punya daya tarik audiens.
+
+* **Popularitas ≠ Rating Tertinggi**
+  Popularitas menggambarkan seberapa banyak film ditonton atau dicari, bukan seberapa baik kualitasnya secara kritis.
+  Contoh: *Minions* sangat populer, tapi belum tentu mendapatkan skor tinggi dari kritikus.
+
+* **Faktor genre dan demografi** sangat mempengaruhi popularitas:
+  Film yang ramah keluarga atau penuh aksi umumnya menjangkau lebih banyak penonton lintas usia dan budaya.
 
 ---
 
 ## **4. Data Preparation**
 
-Sebelum dilakukan analisis atau pemodelan lebih lanjut, data perlu dibersihkan dan disiapkan. Tahapan ini meliputi konversi format data, merge antar tabel, mengatasi missing value, outlier, dan menyiapkan fitur agar siap dianalisis.
+Sebelum dilakukan analisis atau pemodelan lebih lanjut, data perlu dibersihkan dan disiapkan. Tahapan ini meliputi menentukan sampel yang digunakan, konversi format data, merge antar tabel, mengatasi missing value, outlier, menyiapkan fitur agar siap dianalisis dan TF-IDF Vectorizer.
 
 ### **a. Menentukan sample yang digunakan**
 

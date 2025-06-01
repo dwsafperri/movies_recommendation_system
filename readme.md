@@ -534,10 +534,21 @@ tfidf = TfidfVectorizer()
 # Fit dan transform kolom genres menjadi matriks TF-IDF
 tfidf_matrix = tfidf.fit_transform(movie_merged['genres'])
 
-# Melihat ukuran matrix tfidf
-tfidf_matrix.shape
 ```
-> (992, 22)
+
+**Hasil Output :**
+
+```
+array(['action', 'adventure', 'animation', 'comedy', 'crime',
+       'documentary', 'drama', 'family', 'fantasy', 'fiction', 'foreign',
+       'history', 'horror', 'movie', 'music', 'mystery', 'romance',
+       'science', 'thriller', 'tv', 'war', 'western'], dtype=object)
+```
+
+**Insight:**
+
+Ini adalah proses transformasi data teks pada kolom `genres` menjadi representasi numerik menggunakan teknik TF-IDF, yang bertujuan untuk mengetahui seberapa penting suatu genre (seperti 'action', 'drama', 'comedy', dll.) dalam keseluruhan kumpulan data film berdasarkan frekuensi kemunculannya secara proporsional.
+
 
 ```
 # Mengubah vektor tf-idf dalam bentuk matriks dengan fungsi todense()

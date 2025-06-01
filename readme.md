@@ -59,14 +59,6 @@ Data columns (total 4 columns):
 
 Data ratings memiliki 26.024.289 baris dan 4 fitur.
 
-Karena data terlalu besar, hanya 10.000 data yang diambil:
-
-```python
-ratings = data_ratings.sample(n=10000, random_state=42)
-ratings.shape
-# Output: (10000, 4)
-```
-
 ## **Dataset: Movies Metadata**
 
 ```python
@@ -107,14 +99,6 @@ Data columns (total 24 columns):
 **Insight:**
 
 Data movies memiliki 45.466 baris dan 24 kolom.
-
-Karena data terlalu besar, hanya 10.000 data yang diambil:
-
-```python
-movies = data_movies.sample(n=10000, random_state=42)
-movies.shape
-# Output: (10000, 24)
-```
 
 ---
 
@@ -290,7 +274,31 @@ Exploratory Data Analysis (EDA) dilakukan untuk memahami pola, anomali, serta hu
 
 Sebelum dilakukan analisis atau pemodelan lebih lanjut, data perlu dibersihkan dan disiapkan. Tahapan ini meliputi konversi format data, merge antar tabel, mengatasi missing value, outlier, dan menyiapkan fitur agar siap dianalisis.
 
-### **a. Mengubah Dictionary menjadi String**
+### **a. Menentukan sample yang digunakan**
+
+Dikarenakan jumlah data yang terlalu banyak, maka data yang diambil hanya 10.000 data.
+
+```
+ratings = data_ratings.sample(n=10000, random_state=42)
+ratings.shape
+```
+> Output : (1000, 4)
+**Insight :**
+
+Data ratings berhasil di filter sebanyak 10.000 data.
+
+```
+movies = data_movies.sample(n=10000, random_state=42)
+movies.shape
+```
+
+> Output : (1000, 25)
+
+**Insight :**
+
+Data movies berhasil di filter sebanyak 10.000 data.
+
+### **b. Mengubah Dictionary menjadi String**
 
 ```
 python
@@ -324,13 +332,39 @@ df = df[['id', 'title', 'genres']].rename(columns={'id': 'movieId'})
 # Tampilkan 5 data teratas sebagai sampel
 df.head()
 ````
+**Output :**
+```
+	movieId	title			genres
+43526	411405	Small Crimes		Drama | Comedy | Thriller | Crime
+6383	42492	Up the Sandbox		Drama | Comedy
+3154	12143	Bad Lieutenant		Crime | Drama
+10146	9976	Satan's Little Helper	Horror | Romance | Comedy
+9531	46761	Sitcom			Comedy | Drama | Thriller
+```
 
 **Insight :**
 Data berhasil diubah dari format string kompleks menjadi format yang lebih sederhana dan mudah dipakai, dan disimpan dalam dataframe `df`.
 
 ---
 
-### **b. Mengubah tipe data `movieId` menjadi string**
+### **c. Mengubah tipe data `movieId` menjadi string**
+
+Kode ini bertujuan untuk memilih kolom-kolom penting dari DataFrame `movies`, memformat data pada kolom `genres`, dan menyusun ulang data dalam format yang lebih bersih dan terstruktur untuk keperluan analisis lebih lanjut.
+
+**Penjelasan Setiap Langkah**
+
+1. **Fungsi `format_genres`**
+   Fungsi ini mengubah data dalam kolom `genres` yang awalnya berbentuk string dari list of dictionary (misalnya: `"[{'id': 28, 'name': 'Action'}, {'id': 12, 'name': 'Adventure'}]"`) menjadi string biasa yang berisi nama-nama genre yang dipisahkan dengan tanda `|`, seperti:
+   `"Action | Adventure"`.
+
+2. **`df = movies[['id', 'title']].copy()`**
+   Baris ini menyalin kolom `id` dan `title` dari DataFrame `movies`. Hanya kolom-kolom yang dianggap relevan yang diambil untuk diproses lebih lanjut.
+
+3. **`df['genres'] = movies['genres'].apply(format_genres)`**
+   Fungsi `format_genres` diterapkan ke kolom `genres` dalam DataFrame `movies`, kemudian hasilnya disimpan dalam kolom baru `genres` pada DataFrame `df`.
+
+4. **Penyusunan Ulang dan Penggantian Nama Kolom**
+   Kolom disusun ulang menjadi urutan `id`, `title`, dan `genres`, kemudian kolom `id` diubah namanya menjadi `movieId` untuk konsistensi dengan format umum pada sistem rekomendasi.
 
 ```python
 df['movieId'] = df['movieId'].astype(str)
@@ -380,23 +414,23 @@ movie_merged
 **Hasil Output :**
 
 ```
-	userId	movieId	rating	timestamp	title	genres
-0	43059	1367	4.0	1088197740	Rocky II	Drama
+	userId	movieId	rating	timestamp	title							genres
+0	43059	1367	4.0	1088197740	Rocky II						Drama
 1	255724	4975	1.0	1082336474	Love Is the Devil: Study for a Portrait of Fra...	TV Movie | Drama
-2	246259	587	4.0	945228093	Big Fish	Adventure | Fantasy | Drama
-3	72228	3022	3.5	1117138601	Dr. Jekyll and Mr. Hyde	Drama | Horror | Science Fiction
-4	218871	5991	3.5	1287676841	The Last Laugh	Drama
+2	246259	587	4.0	945228093	Big Fish						Adventure | Fantasy | Drama
+3	72228	3022	3.5	1117138601	Dr. Jekyll and Mr. Hyde					Drama | Horror | Science Fiction
+4	218871	5991	3.5	1287676841	The Last Laugh						Drama
 ...	...	...	...	...	...	...
-987	116964	2734	3.0	1008741797	David	Drama | History
-988	152250	69928	4.0	1339373959	The Man Who Loved Women	Comedy
-989	118327	2108	4.0	1017621443	The Breakfast Club	Comedy | Drama
-990	183641	919	4.0	1454248623	Blood: The Last Vampire	Fantasy | Animation | Horror | Comedy | Thrill...
-991	135992	316	3.0	847883933	Grill Point	Comedy | Drama
+987	116964	2734	3.0	1008741797	David							Drama | History
+988	152250	69928	4.0	1339373959	The Man Who Loved Women					Comedy
+989	118327	2108	4.0	1017621443	The Breakfast Club					Comedy | Drama
+990	183641	919	4.0	1454248623	Blood: The Last Vampire					Fantasy | Animation | Horror | Comedy | Thrill...
+991	135992	316	3.0	847883933	Grill Point						Comedy | Drama
 992 rows × 6 columns
 ```
 
 **Insight :**
-Data berhasil di-merge berdasarkan kolom `movieId`, menghasilkan 992 baris dan 6 kolom: `userId`, `movieId`, `rating`, `timestamp`, `title`, dan `genres`.
+Data berhasil di-merge berdasarkan kolom `movieId` pada df `ratings` dan `df`, menghasilkan 992 baris dan 6 kolom: `userId`, `movieId`, `rating`, `timestamp`, `title`, dan `genres`.
 
 ---
 
@@ -485,13 +519,7 @@ print(genres_list)
 **Insight :**
 Kode ini mengekstrak semua genre unik dari kolom `genres` pada `movie_merged`, memisahkan dengan delimiter `|`, dan menyimpannya dalam list tanpa duplikat. Hasil akhirnya adalah daftar genre unik yang bisa digunakan untuk analisis lanjutan.
 
----
-
-## **Model Development: Content-Based Filtering menggunakan TF-IDF Vectorizer**
-
-Untuk membangun sistem rekomendasi film berbasis konten, pendekatan yang digunakan adalah **content-based filtering**, yang merekomendasikan film berdasarkan kemiripan kontennya — dalam hal ini adalah **genre**. Langkah-langkah pengembangannya dijelaskan sebagai berikut:
-
-### **TF-IDF Vectorizer**
+### **h. TF-IDF Vectorizer**
 
 Pertama-tama, informasi genre dari setiap film diubah menjadi representasi numerik menggunakan **TF-IDF (Term Frequency - Inverse Document Frequency)**. TF-IDF adalah teknik yang sering digunakan dalam pemrosesan teks untuk merepresentasikan seberapa penting suatu kata (dalam hal ini, genre) dalam suatu dokumen (film) dibandingkan dengan seluruh kumpulan dokumen (film-film lain).
 
@@ -499,19 +527,6 @@ Pertama-tama, informasi genre dari setiap film diubah menjadi representasi numer
 * **Inverse Document Frequency (IDF)** menurunkan bobot genre yang terlalu umum (misalnya "drama" mungkin muncul di banyak film), sehingga genre yang lebih unik mendapat bobot lebih tinggi.
 
 Hasil dari proses ini adalah **matriks TF-IDF**, di mana setiap baris merepresentasikan satu film dan setiap kolom mewakili satu genre. Nilai-nilai dalam matriks ini menunjukkan seberapa kuat keterkaitan film tersebut dengan masing-masing genre.
-
-### **Cosine Similarity**
-
-Setelah setiap film direpresentasikan sebagai vektor TF-IDF, langkah berikutnya adalah mengukur tingkat kemiripan antar film. Untuk ini digunakan **cosine similarity**, yaitu ukuran kesamaan antara dua vektor berdasarkan sudut di antara mereka.
-
-* Nilai cosine similarity berkisar antara **0** (tidak mirip sama sekali) hingga **1** (sangat mirip).
-* Dua film dianggap mirip jika genre-nya memiliki distribusi yang serupa dalam representasi TF-IDF mereka.
-
-Dengan menggunakan cosine similarity, sistem dapat mencari film yang paling dekat (mirip) vektornya dengan film input, dan merekomendasikannya ke pengguna.
-
----
-
-### 1. **Inisialisasi TF-IDF Vectorizer**
 
 Langkah pertama adalah mengubah teks pada kolom `genres` menjadi representasi numerik menggunakan **TF-IDF (Term Frequency - Inverse Document Frequency)**. Proses ini bertujuan untuk mengetahui seberapa penting suatu genre (seperti *action*, *drama*, *comedy*, dll.) dalam keseluruhan kumpulan data film:
 
@@ -555,11 +570,92 @@ matrix([[0.        , 0.        , 0.        , ..., 0.        , 0.        ,
 > **Insight:**
 > TF-IDF berhasil mengubah data genre dari 992 film menjadi matriks berukuran 992 × 22, di mana setiap baris mewakili satu film dan setiap kolom mewakili bobot penting genre tertentu. Ini memungkinkan analisis numerik berbasis teks yang lebih akurat.
 
+```
+# Membuat dataframe untuk melihat tf-idf matrix
+# Kolom diisi dengan jenis genre
+# Baris diisi dengan judul movie
+
+pd.DataFrame(
+    tfidf_matrix.todense(),
+    columns=tfidf.get_feature_names_out(),
+    index=movie_merged.title
+).sample(22, axis=1).sample(10, axis=0)
+```
+
+**Output :**
+```
+drama	action	documentary	adventure	fiction	fantasy	western	family	romance	foreign	...	mystery	horror	science	movie	tv	animation	crime	comedy	thriller	music
+title																					
+48 Hrs.	0.302745	0.474558	0.0	0.000000	0.000000	0.000000	0.0	0.0	0.0	0.0	...	0.000000	0.0	0.000000	0.0	0.0	0.0	0.526189	0.443827	0.457475	0.0
+Men in Black II	0.000000	0.408583	0.0	0.435793	0.498561	0.000000	0.0	0.0	0.0	0.0	...	0.000000	0.0	0.498561	0.0	0.0	0.0	0.000000	0.382124	0.000000	0.0
+Murder She Said	0.291891	0.000000	0.0	0.000000	0.000000	0.000000	0.0	0.0	0.0	0.0	...	0.688702	0.0	0.000000	0.0	0.0	0.0	0.507324	0.427915	0.000000	0.0
+The Green Mile	0.351208	0.000000	0.0	0.000000	0.000000	0.709958	0.0	0.0	0.0	0.0	...	0.000000	0.0	0.000000	0.0	0.0	0.0	0.610420	0.000000	0.000000	0.0
+Citizen Kane	0.390226	0.000000	0.0	0.000000	0.000000	0.000000	0.0	0.0	0.0	0.0	...	0.920719	0.0	0.000000	0.0	0.0	0.0	0.000000	0.000000	0.000000	0.0
+The Green Mile	0.351208	0.000000	0.0	0.000000	0.000000	0.709958	0.0	0.0	0.0	0.0	...	0.000000	0.0	0.000000	0.0	0.0	0.0	0.610420	0.000000	0.000000	0.0
+Tough Enough	0.551873	0.000000	0.0	0.000000	0.000000	0.000000	0.0	0.0	0.0	0.0	...	0.000000	0.0	0.000000	0.0	0.0	0.0	0.000000	0.000000	0.833928	0.0
+Indiana Jones and the Last Crusade	0.000000	0.683965	0.0	0.729515	0.000000	0.000000	0.0	0.0	0.0	0.0	...	0.000000	0.0	0.000000	0.0	0.0	0.0	0.000000	0.000000	0.000000	0.0
+The Perfect Storm	1.000000	0.000000	0.0	0.000000	0.000000	0.000000	0.0	0.0	0.0	0.0	...	0.000000	0.0	0.000000	0.0	0.0	0.0	0.000000	0.000000	0.000000	0.0
+Bad Boys II	0.000000	0.439755	0.0	0.469041	0.000000	0.000000	0.0	0.0	0.0	0.0	...	0.000000	0.0	0.000000	0.0	0.0	0.0	0.487600	0.411278	0.423925	0.0
+10 rows × 22 columns
+```
+
+**Insight :**
+
+Movie *The Perfect Storm* memiliki genre *war*, movie *Citizen Kane* memiliki genre *mystery*, movie *Indiana Jones and the Last Crusade* memiliki genre *adventure*.
+
+TF-IDF berhasil membantu mengidentifikasi genre paling khas di tiap film.
+
 ---
 
-### 2. **Membangun Matriks Similarity dengan Cosine Similarity**
+## **Model Development: Content-Based Filtering menggunakan Cosine Similarity**
 
-Selanjutnya, digunakan cosine similarity untuk mengukur tingkat kemiripan antara dua film berdasarkan representasi numerik dari genre mereka. Setiap film direpresentasikan dalam bentuk vektor yang menggambarkan genre-genre yang dimiliki, kemudian dihitung sudut kosinus antara vektor-vektor tersebut untuk menentukan seberapa mirip kedua film tersebut secara genre.
+Untuk membangun sistem rekomendasi film berbasis konten, pendekatan yang digunakan adalah **content-based filtering**, yang merekomendasikan film berdasarkan kemiripan kontennya — dalam hal ini adalah **genre**. Langkah-langkah pengembangannya dijelaskan sebagai berikut:
+
+---
+
+### **1. Penggunaan Cosine Similarity untuk Mengukur Kemiripan Antar Film**
+
+Untuk membangun sistem rekomendasi berbasis konten, pendekatan yang digunakan adalah **content-based filtering**, di mana rekomendasi diberikan berdasarkan kemiripan konten antar item, dalam hal ini adalah **genre** film. Genre setiap film direpresentasikan dalam bentuk vektor menggunakan metode **TF-IDF (Term Frequency-Inverse Document Frequency)**. Vektor tersebut kemudian dibandingkan satu sama lain untuk mengukur tingkat kemiripan.
+
+Ukuran kemiripan yang digunakan adalah **cosine similarity**, yang menghitung seberapa kecil sudut antara dua vektor dalam ruang multidimensi. Karakteristik dari cosine similarity:
+
+* Nilainya berkisar dari **0** hingga **1**, di mana nilai **1** menunjukkan dua vektor sangat mirip atau identik, dan **0** berarti tidak ada kemiripan.
+* Dalam konteks ini, dua film dianggap mirip jika genre-nya memiliki distribusi kata yang serupa dalam representasi TF-IDF-nya.
+
+Dengan pendekatan ini, sistem dapat mengidentifikasi film-film yang paling relevan berdasarkan genre dari film input, kemudian menyarankan film-film yang memiliki konten paling mirip.
+
+---
+
+### **2. Fungsi `movie_recommendations()` untuk Menghasilkan Rekomendasi**
+
+Fungsi `movie_recommendations()` bertanggung jawab untuk menghasilkan daftar rekomendasi film berdasarkan hasil perhitungan cosine similarity. Berikut adalah penjelasan alur kerja dari fungsi tersebut:
+
+* **Parameter yang digunakan**:
+
+  * `title`: Judul film yang dijadikan referensi awal untuk mencari kemiripan.
+  * `similarity`: Matriks cosine similarity antar film, di mana nilai di dalamnya menunjukkan tingkat kemiripan antara setiap pasangan film.
+  * `items`: DataFrame yang berisi informasi film (judul dan genre).
+  * `top_n`: Jumlah film yang ingin direkomendasikan.
+
+* **Langkah-langkah dalam fungsi**:
+
+  1. Mengecek apakah judul film input tersedia dalam kolom matriks similarity. Jika tidak ditemukan, fungsi akan menghentikan proses dengan menampilkan error.
+  2. Menentukan batas maksimum rekomendasi (`top_n`), disesuaikan agar tidak melebihi jumlah film dalam dataset.
+  3. Mengambil indeks film-film dengan nilai cosine similarity tertinggi terhadap film input menggunakan metode `argpartition` — pendekatan ini efisien untuk pencarian elemen terbesar.
+  4. Menghapus film itu sendiri dari hasil rekomendasi agar tidak direkomendasikan ke pengguna.
+  5. Menggabungkan hasil rekomendasi dengan DataFrame `items` untuk menampilkan informasi judul dan genre film.
+  6. Mengembalikan `top_n` film yang paling mirip sebagai hasil rekomendasi.
+
+Dengan demikian, fungsi ini menjadi inti dari sistem rekomendasi berbasis konten yang mengandalkan kemiripan genre untuk menyarankan film-film relevan kepada pengguna.
+
+### **a. Cosine Similarity**
+
+Setelah setiap film direpresentasikan sebagai vektor TF-IDF, langkah berikutnya adalah mengukur tingkat kemiripan antar film. Untuk ini digunakan **cosine similarity**, yaitu ukuran kesamaan antara dua vektor berdasarkan sudut di antara mereka.
+
+* Nilai cosine similarity berkisar antara **0** (tidak mirip sama sekali) hingga **1** (sangat mirip).
+* Dua film dianggap mirip jika genre-nya memiliki distribusi yang serupa dalam representasi TF-IDF mereka.
+
+Dengan menggunakan cosine similarity, sistem dapat mencari film yang paling dekat (mirip) vektornya dengan film input, dan merekomendasikannya ke pengguna. Setiap film direpresentasikan dalam bentuk vektor yang menggambarkan genre-genre yang dimiliki, kemudian dihitung sudut kosinus antara vektor-vektor tersebut untuk menentukan seberapa mirip kedua film tersebut secara genre.
 
 ```
 from sklearn.metrics.pairwise import cosine_similarity
@@ -612,26 +708,28 @@ print('Shape:', cosine_sim_df.shape)
 cosine_sim_df.sample(5, axis=1).sample(20, axis=0)
 ```
 
-| title                      | The Day After Tomorrow | xXx      | Hot Fuzz | My Name Is Bruce | Sissi   |
-|----------------------------|------------------------|----------|----------|------------------|---------|
-| Sissi                      | 0.000000               | 0.000000 | 0.297876 | 0.310492         | 1.000000|
-| The Prize                  | 0.000000               | 0.000000 | 0.353255 | 0.000000         | 0.123619|
-| Tibet: Cry of the Snow Lion| 0.000000               | 0.000000 | 0.000000 | 0.000000         | 0.000000|
-| Roustabout                 | 0.000000               | 0.000000 | 0.000000 | 0.000000         | 0.498377|
-| Mothra vs. Godzilla        | 0.799149               | 0.468825 | 0.218003 | 0.000000         | 0.000000|
-| Copying Beethoven          | 0.000000               | 0.000000 | 0.000000 | 0.000000         | 0.382776|
-| Ocean's Eleven             | 0.149648               | 0.210092 | 0.472830 | 0.204880         | 0.207783|
-| Uncle Buck                 | 0.000000               | 0.000000 | 0.241166 | 0.251379         | 0.373564|
-| Live and Let Die           | 0.712297               | 1.000000 | 0.324100 | 0.000000         | 0.000000|
-| Dave Chappelle Block Party | 0.000000               | 0.000000 | 0.179346 | 0.186941         | 0.189590|
-| Italian for Beginners      | 0.000000               | 0.000000 | 0.297876 | 0.310492         | 1.000000|
-| 48 Hrs.                    | 0.372390               | 0.522802 | 0.836099 | 0.245574         | 0.364938|
-| The Other Side of the Bed  | 0.000000               | 0.000000 | 0.000000 | 0.000000         | 0.827713|
-| Jacob's Ladder             | 0.000000               | 0.000000 | 0.000000 | 0.543575         | 0.113181|
-| Madagascar                 | 0.000000               | 0.000000 | 0.000000 | 0.000000         | 0.000000|
-| Dr. Jekyll and Mr. Hyde    | 0.522808               | 0.000000 | 0.000000 | 0.506227         | 0.105405|
-| Bonnie and Clyde           | 0.000000               | 0.000000 | 0.545493 | 0.000000         | 0.190891|
-
+| title                   | Let's Get Harry | Tough Enough | That Man from Rio | Metropolis | Roustabout |
+|-------------------------|-----------------|--------------|-------------------|------------|------------|
+| Grill Point             | 0.000000        | 0.310986     | 0.445156          | 0.195398   | 0.156908   |
+| Basquiat                | 0.000000        | 0.186034     | 0.000000          | 0.116889   | 0.093863   |
+| The Man in the Iron Mask | 0.000000        | 0.255213     | 0.000000          | 0.160355   | 0.602113   |
+| Jurassic Park           | 0.383551        | 0.000000     | 0.323102          | 0.797856   | 0.000000   |
+| The Green Mile          | 0.000000        | 0.193822     | 0.000000          | 0.121782   | 0.097793   |
+| The Host                | 0.000000        | 0.151969     | 0.000000          | 0.794141   | 0.076676   |
+| Rocky II                | 0.000000        | 0.551873     | 0.000000          | 0.346752   | 0.278447   |
+| Beauty and the Beast    | 0.000000        | 0.186436     | 0.000000          | 0.117141   | 0.439850   |
+| Rocky V                 | 0.000000        | 0.551873     | 0.000000          | 0.346752   | 0.278447   |
+| Rome, Open City         | 0.000000        | 0.186034     | 0.000000          | 0.116889   | 0.093863   |
+| The Discovery of Heaven | 0.000000        | 0.244701     | 0.000000          | 0.153750   | 0.123464   |
+| That Man from Rio       | 0.842396        | 0.000000     | 1.000000          | 0.000000   | 0.000000   |
+| The Tunnel              | 0.000000        | 0.000000     | 0.000000          | 0.937957   | 0.000000   |
+| The Machinist           | 0.000000        | 1.000000     | 0.000000          | 0.191363   | 0.153667   |
+| Beauty and the Beast    | 0.000000        | 0.186436     | 0.000000          | 0.117141   | 0.439850   |
+| The Hours               | 0.000000        | 0.551873     | 0.000000          | 0.346752   | 0.278447   |
+| Spy Game                | 0.384837        | 0.452325     | 0.324185          | 0.000000   | 0.000000   |
+| Reign Over Me           | 0.000000        | 0.551873     | 0.000000          | 0.346752   | 0.278447   |
+| Metropolis              | 0.000000        | 0.191363     | 0.000000          | 1.000000   | 0.096552   |
+| Ocean's Eleven          | 0.000000        | 0.318282     | 0.199528          | 0.000000   | 0.578234   |
 
 > **Insight:**
 
@@ -641,11 +739,11 @@ Setiap sel menunjukkan seberapa mirip dua film berdasarkan TF-IDF genre-nya:
 
 - Nilai mendekati 0 berarti tidak mirip.
 
-Berdasarkan matriks similarity yang ditampilkan, film *Live and Let Die* memiliki nilai kemiripan tertinggi dengan film *xXx* sebesar 1.0, yang menunjukkan kesamaan genre atau fitur lainnya yang sangat kuat antara kedua film tersebut. Sementara itu, nilai kemiripan *Live and Let Die* dengan film-film lain seperti *The Day After Tomorrow* dan *Hot Fuzz* relatif lebih rendah. Hal ini mengindikasikan bahwa dalam sistem rekomendasi berbasis content filtering, film *Live and Let Die* cenderung direkomendasikan bersama film-film yang memiliki karakteristik serupa dengan *xXx*.
+Berdasarkan matriks similarity yang ditampilkan, film *The Machinist* memiliki nilai kemiripan tertinggi dengan film *Tough Enough	* sebesar 1.0, yang menunjukkan kesamaan genre atau fitur lainnya yang sangat kuat antara kedua film tersebut. 
 
 ---
 
-### 3. **Movie Recommendation Function**
+### 2. **Movie Recommendation Function**
 
 Fungsi berikut dibuat untuk menghasilkan rekomendasi film berdasarkan judul film yang dimasukkan. Proses utama yang terjadi di fungsi ini adalah:
 
@@ -708,27 +806,7 @@ def movie_recommendations(title, similarity=cosine_sim_df, items=movie_merged[['
 
 Fungsi ini bertujuan untuk **memberikan rekomendasi film berdasarkan kemiripan genre film yang sudah ada**. Kemiripan ini dihitung menggunakan **cosine similarity**, yaitu sebuah metode yang mengukur seberapa mirip dua film berdasarkan fitur (dalam kasus ini genre) yang mereka miliki.
 
-
 ---
-
-Contoh penggunaan:
-
-```python
-movie_recommendations("Man's Favorite Sport?")
-```
-
-**Output Rekomendasi:**
-
-| title                                    | genres                          |
-| ---------------------------------------- | ------------------------------- |
-| The Man in the Iron Mask                 | Romance \| Drama                |
-| The 400 Blows                            | Drama                           |
-| Harry Potter and the Prisoner of Azkaban | Adventure \| Fantasy \| Family  |
-| Live and Let Die                         | Adventure \| Action \| Thriller |
-| House of Dracula                         | Horror \| Science Fiction       |
-
-> **Insight:**
-> Sistem rekomendasi berhasil memberikan daftar film yang memiliki genre serupa dengan film input, dalam hal ini *Man's Favorite Sport?*. Hal ini menunjukkan bahwa genre dapat menjadi indikator kuat dalam menentukan kemiripan konten antar film.
 
 Contoh penggunaan function movie_recommendation dengan top_n = 10 dengan judul 'Beauty and The Beast' :
 ```
@@ -736,18 +814,20 @@ movie_recommendations('Beauty and the Beast', top_n = 10)
 ```
 
 **Output Rekomendasi :***
-|    | Title                                         | Genres                                 		  |
-|----|-----------------------------------------------|----------------------------------------------------|
-| 0  | Jurassic Park                                 | Adventure \| Science Fiction          		  |
-| 1  | The Golem: How He Came Into the World         | Horror \| Science Fiction \| Thriller 		  |
-| 2  | Armageddon                                    | Action \| Thriller \| Science Fiction \| Adventure |
-| 3  | The Hours                                     | Drama                                 		  |
-| 4  | The Getaway                                   | Drama \| Action \| Thriller           		  |
-| 5  | Grill Point                                   | Comedy \| Drama                        		  |
-| 6  | Love Is the Devil: Study for a Portrait of Fra... | TV Movie \| Drama                     	  |
-| 7  | The Last Laugh                                | Drama                                 	  	  |
-| 8  | The Tunnel                                    | Science Fiction                      		  |
-| 9  | Tough Enough                                  | Drama \| Thriller                      		  |
+|    | Title                                         	 | Genres                                 		  |
+|----|---------------------------------------------------|--------------------------------------------------------|
+| 0  | Jurassic Park                                 	 | Adventure \| Science Fiction          		  |
+| 1  | The Golem: How He Came Into the World         	 | Horror \| Science Fiction \| Thriller 		  |
+| 2  | Armageddon                                    	 | Action \| Thriller \| Science Fiction \| Adventure     |
+| 3  | The Hours                                     	 | Drama                                 		  |
+| 4  | The Getaway                                  	 | Drama \| Action \| Thriller           		  |
+| 5  | Grill Point                                  	 | Comedy \| Drama                        		  |
+| 6  | Love Is the Devil: Study for a Portrait of Fra... | TV Movie \| Drama                     	 	  |
+| 7  | The Last Laugh                                	 | Drama                                 	  	  |
+| 8  | The Tunnel                                   	 | Science Fiction                      		  |
+| 9  | Tough Enough                                  	 | Drama \| Thriller                      		  |
+
+> **Insight:**
 
 > Tabel ini berisi daftar film beserta genre-nya yang bisa digunakan sebagai dasar untuk sistem rekomendasi film berbasis genre. Dengan menggunakan *top\_n = 10*, artinya sistem akan merekomendasikan 10 film paling mirip berdasarkan kesamaan genre dengan film referensi. Genre campuran seperti “Adventure | Science Fiction” atau “Drama | Action | Thriller” menunjukkan bahwa film-film ini bisa memiliki overlap genre yang kompleks, sehingga cosine similarity dapat menangkap tingkat kemiripan yang lebih detail daripada hanya mencocokkan genre tunggal. Ini memungkinkan rekomendasi yang lebih relevan dan beragam bagi pengguna.
 

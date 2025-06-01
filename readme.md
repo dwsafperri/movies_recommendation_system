@@ -738,7 +738,7 @@ Berdasarkan matriks similarity yang ditampilkan, film *The Machinist* memiliki n
 
 ---
 
-### 2. **Movie Recommendation Function**
+### b. **Movie Recommendation Function**
 
 Fungsi berikut dibuat untuk menghasilkan rekomendasi film berdasarkan judul film yang dimasukkan. Proses utama yang terjadi di fungsi ini adalah:
 

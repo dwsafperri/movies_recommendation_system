@@ -86,17 +86,6 @@ Data ratings memiliki 26.024.289 baris dan 4 fitur.
 | `movieId`   | ID film yang diberi rating.                                                   |
 | `rating`    | Nilai rating yang diberikan oleh pengguna (biasanya skala 1.0–5.0).           |
 | `timestamp` | Waktu pemberian rating dalam format Unix timestamp (jumlah detik sejak 1970). |
-
-Dikarenakan jumlah data yang terlalu banyak, maka data yang diambil hanya 10.000 data.
-
-"""
-
-ratings = data_ratings.sample(n=10000, random_state=42)
-ratings.shape
-
-"""**Insight :**
-
-Data ratings berhasil di filter sebanyak 10.000 data.
 """
 
 data_movies = pd.read_csv("/content/movies_metadata.csv")
@@ -132,24 +121,14 @@ Data movies memiliki 45.466 baris dan 24 kolom.
 | `video`                 | Apakah data ini berupa video (`True`/`False`).            |
 | `vote_average`          | Rata-rata rating dari pengguna.                           |
 | `vote_count`            | Jumlah total suara (rating) yang masuk.                   |
-
-Dikarenakan jumlah data yang terlalu banyak, maka data yang diambil hanya 10.000 data.
 """
 
-movies = data_movies.sample(n=10000, random_state=42)
-movies.shape
+print('Jumlah data ratings: ', len(data_ratings.userId.unique()))
+print('Jumlah data movies yang direview: ', len(data_movies.id.unique()))
 
-print('Jumlah data ratings: ', len(ratings.userId.unique()))
-print('Jumlah data movies yang direview: ', len(movies.id.unique()))
+"""### Deskripsi Statistik"""
 
-"""**Insight :**
-
-Data movies berhasil di filter sebanyak 10.000 data.
-
-### Deskripsi Statistik
-"""
-
-ratings.describe()
+data_ratings.describe()
 
 """**Insight :**
 
@@ -162,7 +141,7 @@ ratings.describe()
 
 """
 
-movies.describe()
+data_movies.describe()
 
 """**Insight :**
 
@@ -184,7 +163,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 plt.figure(figsize=(8,4))
-sns.histplot(ratings['rating'], bins=10, kde=True)
+sns.histplot(data_ratings['rating'], bins=10, kde=True)
 plt.title('Distribusi Rating Film')
 plt.xlabel('Rating')
 plt.ylabel('Frekuensi')
@@ -192,31 +171,16 @@ plt.show()
 
 """**Insight :**
 
-1. **Sebaran Rating Tidak Merata (Right-skewed)**
-
-   * Distribusi rating condong ke kanan, yang berarti lebih banyak film yang mendapatkan rating tinggi (antara 3 hingga 5).
-   * Hanya sedikit film yang mendapat rating rendah (kurang dari 2).
-
-2. **Rating Populer di Skor 3 dan 4**
-
-   * Puncak tertinggi histogram (frekuensi paling besar) berada pada rating **3 dan 4**, menunjukkan bahwa sebagian besar pengguna memberikan rating di kisaran ini.
-
-3. **Rating Sempurna (5) Juga Cukup Banyak**
-
-   * Terlihat ada lonjakan lagi di rating **5**, menunjukkan bahwa cukup banyak pengguna yang memberikan nilai sempurna pada film tertentu.
-
-4. **Rating Ekstrem (0 - 1) Sangat Jarang**
-
-   * Frekuensi pada nilai rating mendekati 0 hampir tidak ada, artinya sangat sedikit film yang dianggap "buruk sekali" oleh penonton.
+Grafik tersebut menunjukkan distribusi rating film dalam dataset, dengan tambahan garis KDE (Kernel Density Estimation) yang menggambarkan bentuk distribusi secara halus. Terlihat bahwa sebagian besar rating berkumpul di sekitar angka 3 hingga 4, yang berarti mayoritas pengguna memberikan penilaian cukup positif terhadap film. Puncak-puncak tajam pada garis KDE menandakan adanya frekuensi tinggi pada nilai rating tertentu, seperti 3.0, 4.0, dan 5.0. Hal ini bisa disebabkan oleh kebiasaan pengguna memberikan rating bulat. Sementara itu, rating di bawah 2 terlihat jauh lebih jarang, mengindikasikan bahwa film dengan penilaian sangat rendah lebih sedikit jumlahnya atau jarang diberikan oleh pengguna. Grafik ini menunjukkan bahwa persebaran rating cenderung positif dengan sedikit outlier di sisi rating rendah.
 
 ### **b. Distribusi Tahun Rilis Film**
 """
 
-movies['release_date'] = pd.to_datetime(movies['release_date'], errors='coerce')
-movies['release_year'] = movies['release_date'].dt.year
+data_movies['release_date'] = pd.to_datetime(data_movies['release_date'], errors='coerce')
+data_movies['release_year'] = data_movies['release_date'].dt.year
 
 plt.figure(figsize=(10,5))
-sns.histplot(movies['release_year'].dropna().astype(int), bins=50)
+sns.histplot(data_movies['release_year'].dropna().astype(int), bins=50)
 plt.title('Distribusi Tahun Rilis Film')
 plt.xlabel('Tahun Rilis')
 plt.ylabel('Jumlah Film')
@@ -224,37 +188,13 @@ plt.show()
 
 """**Insight :**
 
-
-1. **Jumlah Film Meningkat Signifikan Setelah Tahun 1980-an**
-
-   * Terlihat pertumbuhan tajam jumlah film mulai dari tahun 1980-an hingga puncaknya di sekitar tahun 2010–2015.
-   * Hal ini mencerminkan kemajuan teknologi produksi, distribusi digital, dan platform streaming.
-
-2. **Ledakan Produksi Film Era 2000-an**
-
-   * Puncak tertinggi terjadi di rentang tahun **2010–2015**, dengan lebih dari 1.200 film dirilis per tahun.
-   * Bisa jadi ini efek dari munculnya studio independen, kemudahan akses teknologi kamera, atau kemunculan platform seperti YouTube dan Netflix.
-
-3. **Produksi Rendah di Awal Abad ke-20**
-
-   * Produksi film sangat sedikit sebelum tahun 1950-an, yang wajar karena industri perfilman masih sangat baru saat itu.
-
-4. **Penurunan di Akhir Distribusi (sekitar 2020)**
-
-   * Ada penurunan tajam setelah 2015–2020. Ini kemungkinan disebabkan oleh:
-
-     * **Data belum lengkap** (film baru belum semuanya masuk ke database).
-     * **Pandemi COVID-19**, yang menyebabkan banyak produksi film tertunda atau dibatalkan.
-
-5. **Distribusi Positively Skewed (Kanan)**
-
-   * Sebagian besar data terkonsentrasi di era modern, menunjukkan tren meningkat seiring waktu.
+Grafik tersebut menunjukkan distribusi jumlah film berdasarkan tahun rilisnya. Terlihat bahwa produksi film masih sangat sedikit sebelum tahun 1950, lalu mulai mengalami peningkatan secara bertahap setelahnya. Lonjakan yang signifikan terjadi sejak era 1990-an hingga mencapai puncaknya sekitar tahun 2010-an. Hal ini mencerminkan perkembangan industri perfilman global, baik dari sisi teknologi, permintaan pasar, maupun kemudahan produksi dan distribusi. Penurunan setelah tahun 2015 kemungkinan disebabkan oleh data yang belum lengkap atau keterbatasan koleksi dataset, bukan berarti produksi film benar-benar menurun secara drastis. Grafik ini menegaskan bahwa mayoritas film dalam dataset berasal dari dua dekade terakhir.
 
 ### **c. Distribusi Runtime**
 """
 
 plt.figure(figsize=(8,4))
-sns.histplot(movies['runtime'].dropna(), bins=50)
+sns.histplot(data_movies['runtime'].dropna(), bins=50)
 plt.title('Distribusi Durasi Film (menit)')
 plt.xlabel('Durasi (menit)')
 plt.ylabel('Jumlah Film')
@@ -272,7 +212,7 @@ plt.show()
 ### **d. Rating Rata-Rata per Film**
 """
 
-avg_rating = ratings.groupby('movieId')['rating'].mean()
+avg_rating = data_ratings.groupby('movieId')['rating'].mean()
 
 plt.figure(figsize=(8,4))
 sns.histplot(avg_rating, bins=50, kde=True)
@@ -313,13 +253,13 @@ plt.show()
 """
 
 # Hitung jumlah rating per film
-ratings_count = ratings.groupby('movieId').size().rename('rating_count')
+ratings_count = data_ratings.groupby('movieId').size().rename('rating_count')
 
 # Hitung rata-rata rating per film
-avg_rating = ratings.groupby('movieId')['rating'].mean().rename('average_rating')
+avg_rating = data_ratings.groupby('movieId')['rating'].mean().rename('average_rating')
 
 # Gabungkan ke movies_metadata pakai 'movieId' (pastikan ada kolom yang sama)
-movies_subset = movies[['id', 'runtime', 'release_year']].copy()
+movies_subset = data_movies[['id', 'runtime', 'release_year']].copy()
 movies_subset['id'] = movies_subset['id'].astype(str)
 
 # Convert movieId ke string agar bisa merge
@@ -347,32 +287,35 @@ plt.show()
 
 """**Insight :**
 
-| Fitur 1        | Fitur 2          | Korelasi  | Interpretasi                                                                                                            |
-| -------------- | ---------------- | --------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `runtime`      | `release_year`   | **0.09**  | Korelasi sangat lemah dan positif → film makin modern cenderung sedikit lebih panjang durasinya, tapi tidak signifikan. |
-| `runtime`      | `average_rating` | **-0.06** | Korelasi sangat lemah dan negatif → durasi film tidak berpengaruh signifikan terhadap rating.                           |
-| `release_year` | `average_rating` | **0.02**  | Hampir tidak ada hubungan antara tahun rilis dan rating. Film lama atau baru punya peluang yang sama untuk disukai.     |
-| `rating_count` | `average_rating` | **0.04**  | Hampir tidak ada korelasi → jumlah rating tidak menunjukkan apakah film disukai atau tidak.                             |
-| `runtime`      | `rating_count`   | **0.02**  | Tidak ada hubungan berarti antara panjang film dan seberapa banyak orang menontonnya.                                   |
+* Semua fitur numerik memiliki **korelasi rendah (|r| < 0.2)**.
+* Artinya: **tidak ada hubungan linear yang kuat** antar fitur numerik.
+* Ini menunjukkan bahwa:
 
+  * Popularitas (jumlah rating) **tidak selalu beriringan** dengan kualitas (rating rata-rata).
+  * Durasi film **bukan indikator utama** apakah film disukai atau tidak.
+  * Tahun rilis juga **bukan penentu utama** nilai atau popularitas film.
 
-- Semua fitur memiliki korelasi rendah (< 0.1) → artinya tidak ada hubungan linear kuat antar fitur numerik.
-Ini menunjukkan bahwa:
-  - Popularitas (jumlah rating) dan kualitas (rating rata-rata) tidak selalu berjalan beriringan.
+Tabel Interpretasi Korelasi
 
-  - Durasi film bukan indikator utama apakah film disukai atau tidak.
+| Fitur 1        | Fitur 2          | Korelasi | Interpretasi                                                                                                      |
+| -------------- | ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `runtime`      | `release_year`   | 0.09     | Korelasi sangat lemah dan positif — film modern cenderung sedikit lebih panjang durasinya, tapi tidak signifikan. |
+| `runtime`      | `average_rating` | -0.06    | Korelasi sangat lemah dan negatif — durasi film **tidak berpengaruh signifikan** terhadap rating.                 |
+| `release_year` | `average_rating` | 0.02     | Hampir tidak ada hubungan — film lama atau baru punya peluang yang sama untuk disukai.                            |
+| `rating_count` | `average_rating` | 0.04     | Hampir tidak ada korelasi — banyaknya orang yang memberi rating **tidak menjamin film disukai**.                  |
+| `runtime`      | `rating_count`   | 0.02     | Tidak ada hubungan berarti antara panjang film dan seberapa banyak orang menontonnya.                             |
 
-  - Tahun rilis juga bukan penentu utama untuk nilai atau popularitas film
+---
 
 ### **f. Top 10 Movies Berdasarkan Popularity**
 """
 
 import pandas as pd
 
-movies['popularity'] = pd.to_numeric(movies['popularity'], errors='coerce')
+data_movies['popularity'] = pd.to_numeric(data_movies['popularity'], errors='coerce')
 
 # Drop data yang popularity-nya kosong
-movies_clean = movies.dropna(subset=['popularity'])
+movies_clean = data_movies.dropna(subset=['popularity'])
 
 # Urutkan berdasarkan popularity tertinggi dan ambil top 10
 top_10_movies = movies_clean.sort_values(by='popularity', ascending=False).head(10)
@@ -387,28 +330,73 @@ plt.show()
 
 """**Insight :**
 
-1. **Film paling populer** secara signifikan adalah **Minions** — dengan selisih yang **sangat besar** dibanding film lainnya. Ini menunjukkan bahwa film ini mendapat perhatian luar biasa dari audiens (kemungkinan dari anak-anak, keluarga, dan strategi promosi besar-besaran).
+1. **Minions** menjadi film **paling populer secara mencolok**, dengan selisih yang sangat besar dibandingkan film lainnya. Ini menunjukkan keberhasilan luar biasa dalam menjangkau audiens, kemungkinan karena:
 
-2. **Big Hero 6** menempati posisi ke-2, masih cukup jauh dibanding Minions, tapi jauh di atas posisi ke-3 (Pulp Fiction). Ini menunjukkan bahwa film animasi dari studio besar punya daya tarik populer yang kuat.
+   * Segmentasi keluarga dan anak-anak.
+   * Visual animasi yang menarik.
+   * Strategi pemasaran besar-besaran secara global.
 
-3. **Kombinasi genre** menarik perhatian:
+2. **Wonder Woman** dan **Beauty and the Beast** menyusul di peringkat ke-2 dan ke-3 dengan popularitas yang cukup tinggi, namun **masih jauh di bawah Minions**. Ini menunjukkan minat besar pada genre **superhero dan fantasi-musikal**.
 
-   * Ada film **animasi dan keluarga** (Minions, Big Hero 6).
-   * Film **aksi dan superhero** (The Dark Knight, Blade Runner, John Wick).
-   * Film **drama dan klasik** (The Shawshank Redemption, Pulp Fiction).
+3. Beberapa film dalam daftar didominasi oleh genre:
 
-4. **Film lama tetap bisa populer** — seperti *Pulp Fiction* dan *The Shawshank Redemption*. Ini menandakan bahwa faktor usia tidak selalu mengurangi popularitas jika film punya kualitas atau status "cult classic".
+   * **Animasi dan keluarga**: `Minions`, `Big Hero 6`.
+   * **Aksi dan petualangan**: `Wonder Woman`, `John Wick`, `Baby Driver`, `Deadpool`, `Avatar`.
+   * **Drama dan misteri**: `Gone Girl`.
 
-**Insight Tambahan**
+4. Film **Gone Girl** menempati posisi ke-10, dengan popularitas yang lebih rendah dari yang lain, namun tetap masuk 10 besar — menunjukkan bahwa genre thriller psikologis juga punya daya tarik audiens.
 
-* **Popularitas ≠ Rating Tinggi**
-  Beberapa film populer seperti *Minions* mungkin tidak memiliki rating tertinggi secara kritis, tapi tetap banyak ditonton karena **segmentasi pasar dan daya tarik massal**.
+* **Popularitas ≠ Rating Tertinggi**
+  Popularitas menggambarkan seberapa banyak film ditonton atau dicari, bukan seberapa baik kualitasnya secara kritis.
+  Contoh: *Minions* sangat populer, tapi belum tentu mendapatkan skor tinggi dari kritikus.
+
+* **Faktor genre dan demografi** sangat mempengaruhi popularitas:
+  Film yang ramah keluarga atau penuh aksi umumnya menjangkau lebih banyak penonton lintas usia dan budaya.
 
 ## **4. Data Preparation**
 
 Sebelum dilakukan analisis atau pemodelan lebih lanjut, data perlu dibersihkan dan disiapkan. Tahapan ini meliputi konversi format data, merge antar tabel, mengatasi missing value, outlier, dan menyiapkan fitur agar siap dianalisis.
 
-### a. Mengubah Dictionary menjadi String
+### a. Menentukan sample yang digunakan
+
+Dikarenakan jumlah data yang terlalu banyak, maka data yang diambil hanya 10.000 data.
+"""
+
+ratings = data_ratings.sample(n=10000, random_state=42)
+ratings.shape
+
+"""**Insight :**
+
+Data ratings berhasil di filter sebanyak 10.000 data.
+"""
+
+movies = data_movies.sample(n=10000, random_state=42)
+movies.shape
+
+"""**Insight :**
+
+Data movies berhasil di filter sebanyak 10.000 data.
+
+### b. Mengubah Dictionary menjadi String
+
+Kode ini bertujuan untuk memilih kolom-kolom penting dari DataFrame `movies`, memformat data pada kolom `genres`, dan menyusun ulang data dalam format yang lebih bersih dan terstruktur untuk keperluan analisis lebih lanjut.
+
+---
+
+**Penjelasan Setiap Langkah**
+
+1. **Fungsi `format_genres`**
+   Fungsi ini mengubah data dalam kolom `genres` yang awalnya berbentuk string dari list of dictionary (misalnya: `"[{'id': 28, 'name': 'Action'}, {'id': 12, 'name': 'Adventure'}]"`) menjadi string biasa yang berisi nama-nama genre yang dipisahkan dengan tanda `|`, seperti:
+   `"Action | Adventure"`.
+
+2. **`df = movies[['id', 'title']].copy()`**
+   Baris ini menyalin kolom `id` dan `title` dari DataFrame `movies`. Hanya kolom-kolom yang dianggap relevan yang diambil untuk diproses lebih lanjut.
+
+3. **`df['genres'] = movies['genres'].apply(format_genres)`**
+   Fungsi `format_genres` diterapkan ke kolom `genres` dalam DataFrame `movies`, kemudian hasilnya disimpan dalam kolom baru `genres` pada DataFrame `df`.
+
+4. **Penyusunan Ulang dan Penggantian Nama Kolom**
+   Kolom disusun ulang menjadi urutan `id`, `title`, dan `genres`, kemudian kolom `id` diubah namanya menjadi `movieId` untuk konsistensi dengan format umum pada sistem rekomendasi.
 """
 
 # Fungsi untuk memformat kolom 'genres' dari string menjadi format string genre yang dipisahkan tanda '|'
@@ -445,7 +433,7 @@ df.head()
 
 Data berhasil diubah dari format string kompleks menjadi format yang lebih sederhana dan mudah dipakai, dan disimpan dalam dataframe `df`.
 
-### **b. Mengubah tipe data movieId menjadi string**
+### **c. Mengubah tipe data `movieId` menjadi string**
 """
 
 ## Mengubah tipe data movieId menjadi string
@@ -557,11 +545,7 @@ Kode ini mengambil semua genre dari kolom genres pada DataFrame movie_merged, di
 
 Setiap kolom baru mewakili satu genre, dan nilainya 1 jika film tersebut memiliki genre tersebut, atau 0 jika tidak. Setelah itu, DataFrame dummy tersebut digabungkan kembali ke movie_merged dengan pd.concat() secara horizontal (axis=1), sehingga dataset kini memiliki representasi genre dalam bentuk numerik
 
-# **Model Development dengan Content Based Features**
-
-Untuk membangun sistem rekomendasi film berbasis konten, pendekatan yang digunakan adalah **content-based filtering**, yang merekomendasikan film berdasarkan kemiripan kontennya — dalam hal ini adalah **genre**. Langkah-langkah pengembangannya dijelaskan sebagai berikut:
-
-**TF-IDF Vectorizer**
+### h. TF-IDF Vectorizer
 
 Pertama-tama, informasi genre dari setiap film diubah menjadi representasi numerik menggunakan **TF-IDF (Term Frequency - Inverse Document Frequency)**. TF-IDF adalah teknik yang sering digunakan dalam pemrosesan teks untuk merepresentasikan seberapa penting suatu kata (dalam hal ini, genre) dalam suatu dokumen (film) dibandingkan dengan seluruh kumpulan dokumen (film-film lain).
 
@@ -569,17 +553,6 @@ Pertama-tama, informasi genre dari setiap film diubah menjadi representasi numer
 * **Inverse Document Frequency (IDF)** menurunkan bobot genre yang terlalu umum (misalnya "drama" mungkin muncul di banyak film), sehingga genre yang lebih unik mendapat bobot lebih tinggi.
 
 Hasil dari proses ini adalah **matriks TF-IDF**, di mana setiap baris merepresentasikan satu film dan setiap kolom mewakili satu genre. Nilai-nilai dalam matriks ini menunjukkan seberapa kuat keterkaitan film tersebut dengan masing-masing genre.
-
-**Cosine Similarity**
-
-Setelah setiap film direpresentasikan sebagai vektor TF-IDF, langkah berikutnya adalah mengukur tingkat kemiripan antar film. Untuk ini digunakan **cosine similarity**, yaitu ukuran kesamaan antara dua vektor berdasarkan sudut di antara mereka.
-
-* Nilai cosine similarity berkisar antara **0** (tidak mirip sama sekali) hingga **1** (sangat mirip).
-* Dua film dianggap mirip jika genre-nya memiliki distribusi yang serupa dalam representasi TF-IDF mereka.
-
-Dengan menggunakan cosine similarity, sistem dapat mencari film yang paling dekat (mirip) vektornya dengan film input, dan merekomendasikannya ke pengguna.
-
-### a. TF-IDF Vectorizer
 
 Langkah pertama adalah mengubah teks pada kolom `genres` menjadi representasi numerik menggunakan **TF-IDF (Term Frequency - Inverse Document Frequency)**. Proses ini bertujuan untuk mengetahui seberapa penting suatu genre (seperti *action*, *drama*, *comedy*, dll.) dalam keseluruhan kumpulan data film:
 """
@@ -628,13 +601,59 @@ pd.DataFrame(
 
 """**Insight :**
 
-Movie *The Dawn Patrol* memiliki genre *war*, movie *Turtles Can Fly* memiliki genre *drama*, movie *The Man Who Loved Woman* memiliki genre *comedy*.
+Movie *The Perfect Storm* memiliki genre *war*, movie *Citizen Kane* memiliki genre *mystery*, movie *Indiana Jones and the Last Crusade* memiliki genre *adventure*.
 
 TF-IDF berhasil membantu mengidentifikasi genre paling khas di tiap film.
 
-### b. Cosine Similarity
+# **Model Development dengan Content Based Features**
 
-Selanjutnya, digunakan **cosine similarity** untuk mengukur tingkat kemiripan antara dua film berdasarkan representasi numerik dari genre mereka. Setiap film direpresentasikan dalam bentuk vektor yang menggambarkan genre-genre yang dimiliki, kemudian dihitung sudut kosinus antara vektor-vektor tersebut untuk menentukan seberapa mirip kedua film tersebut secara genre.
+Untuk membangun sistem rekomendasi film berbasis konten, pendekatan yang digunakan adalah **content-based filtering**, yang merekomendasikan film berdasarkan kemiripan kontennya — dalam hal ini adalah **genre**. Langkah-langkah pengembangannya dijelaskan sebagai berikut:
+
+---
+
+**1. Penggunaan Cosine Similarity untuk Mengukur Kemiripan Antar Film**
+
+Untuk membangun sistem rekomendasi berbasis konten, pendekatan yang digunakan adalah **content-based filtering**, di mana rekomendasi diberikan berdasarkan kemiripan konten antar item, dalam hal ini adalah **genre** film. Genre setiap film direpresentasikan dalam bentuk vektor menggunakan metode **TF-IDF (Term Frequency-Inverse Document Frequency)**. Vektor tersebut kemudian dibandingkan satu sama lain untuk mengukur tingkat kemiripan.
+
+Ukuran kemiripan yang digunakan adalah **cosine similarity**, yang menghitung seberapa kecil sudut antara dua vektor dalam ruang multidimensi. Karakteristik dari cosine similarity:
+
+* Nilainya berkisar dari **0** hingga **1**, di mana nilai **1** menunjukkan dua vektor sangat mirip atau identik, dan **0** berarti tidak ada kemiripan.
+* Dalam konteks ini, dua film dianggap mirip jika genre-nya memiliki distribusi kata yang serupa dalam representasi TF-IDF-nya.
+
+Dengan pendekatan ini, sistem dapat mengidentifikasi film-film yang paling relevan berdasarkan genre dari film input, kemudian menyarankan film-film yang memiliki konten paling mirip.
+
+---
+
+**2. Fungsi `movie_recommendations()` untuk Menghasilkan Rekomendasi**
+
+Fungsi `movie_recommendations()` bertanggung jawab untuk menghasilkan daftar rekomendasi film berdasarkan hasil perhitungan cosine similarity. Berikut adalah penjelasan alur kerja dari fungsi tersebut:
+
+* **Parameter yang digunakan**:
+
+  * `title`: Judul film yang dijadikan referensi awal untuk mencari kemiripan.
+  * `similarity`: Matriks cosine similarity antar film, di mana nilai di dalamnya menunjukkan tingkat kemiripan antara setiap pasangan film.
+  * `items`: DataFrame yang berisi informasi film (judul dan genre).
+  * `top_n`: Jumlah film yang ingin direkomendasikan.
+
+* **Langkah-langkah dalam fungsi**:
+
+  1. Mengecek apakah judul film input tersedia dalam kolom matriks similarity. Jika tidak ditemukan, fungsi akan menghentikan proses dengan menampilkan error.
+  2. Menentukan batas maksimum rekomendasi (`top_n`), disesuaikan agar tidak melebihi jumlah film dalam dataset.
+  3. Mengambil indeks film-film dengan nilai cosine similarity tertinggi terhadap film input menggunakan metode `argpartition` — pendekatan ini efisien untuk pencarian elemen terbesar.
+  4. Menghapus film itu sendiri dari hasil rekomendasi agar tidak direkomendasikan ke pengguna.
+  5. Menggabungkan hasil rekomendasi dengan DataFrame `items` untuk menampilkan informasi judul dan genre film.
+  6. Mengembalikan `top_n` film yang paling mirip sebagai hasil rekomendasi.
+
+Dengan demikian, fungsi ini menjadi inti dari sistem rekomendasi berbasis konten yang mengandalkan kemiripan genre untuk menyarankan film-film relevan kepada pengguna.
+
+### a. Cosine Similarity
+
+Setelah setiap film direpresentasikan sebagai vektor TF-IDF, langkah berikutnya adalah mengukur tingkat kemiripan antar film. Untuk ini digunakan **cosine similarity**, yaitu ukuran kesamaan antara dua vektor berdasarkan sudut di antara mereka.
+
+* Nilai cosine similarity berkisar antara **0** (tidak mirip sama sekali) hingga **1** (sangat mirip).
+* Dua film dianggap mirip jika genre-nya memiliki distribusi yang serupa dalam representasi TF-IDF mereka.
+
+Dengan menggunakan cosine similarity, sistem dapat mencari film yang paling dekat (mirip) vektornya dengan film input, dan merekomendasikannya ke pengguna. Setiap film direpresentasikan dalam bentuk vektor yang menggambarkan genre-genre yang dimiliki, kemudian dihitung sudut kosinus antara vektor-vektor tersebut untuk menentukan seberapa mirip kedua film tersebut secara genre.
 """
 
 from sklearn.metrics.pairwise import cosine_similarity
@@ -668,9 +687,9 @@ Setiap sel menunjukkan seberapa mirip dua film berdasarkan TF-IDF genre-nya:
 
 - Nilai mendekati 0 berarti tidak mirip.
 
-Berdasarkan matriks similarity yang ditampilkan, film *Live and Let Die* memiliki nilai kemiripan tertinggi dengan film *xXx* sebesar 1.0, yang menunjukkan kesamaan genre atau fitur lainnya yang sangat kuat antara kedua film tersebut. Sementara itu, nilai kemiripan *Live and Let Die* dengan film-film lain seperti *The Day After Tomorrow* dan *Hot Fuzz* relatif lebih rendah. Hal ini mengindikasikan bahwa dalam sistem rekomendasi berbasis content filtering, film *Live and Let Die* cenderung direkomendasikan bersama film-film yang memiliki karakteristik serupa dengan *xXx*.
+Berdasarkan matriks similarity yang ditampilkan, film *The Machinist* memiliki nilai kemiripan tertinggi dengan film *Tough Enough	* sebesar 1.0, yang menunjukkan kesamaan genre atau fitur lainnya yang sangat kuat antara kedua film tersebut.
 
-## **c. Movie Recommendation Function**
+## **b. Movie Recommendation Function**
 
 Fungsi berikut dibuat untuk menghasilkan rekomendasi film berdasarkan judul film yang dimasukkan. Proses utama yang terjadi di fungsi ini adalah:
 
@@ -738,9 +757,68 @@ movie_recommendations('Beauty and the Beast', top_n = 10)
 
 """**Insight :**
 
-Model berhasil memberikan rekomendasi film yang relevan berdasarkan kemiripan vektor fitur antar film. Ketika diberikan input "Man's Favorite Sport?", model mampu mengusulkan film-film dengan genre yang sebagian besar masih berkaitan (misalnya **Romance** dan **Drama**), meskipun ada sedikit variasi dalam genre (seperti **Adventure** atau **Fantasy**), yang umum dalam sistem berbasis konten. Ini menunjukkan bahwa pendekatan cosine similarity pada representasi fitur (kemungkinan dari genre atau metadata lainnya) bekerja secara efektif dalam mengidentifikasi kemiripan antar film.
+Tabel ini berisi daftar film beserta genre-nya yang bisa digunakan sebagai dasar untuk sistem rekomendasi film berbasis genre. Dengan menggunakan *top\_n = 10*, artinya sistem akan merekomendasikan 10 film paling mirip berdasarkan kesamaan genre dengan film referensi. Genre campuran seperti “Adventure | Science Fiction” atau “Drama | Action | Thriller” menunjukkan bahwa film-film ini bisa memiliki overlap genre yang kompleks, sehingga cosine similarity dapat menangkap tingkat kemiripan yang lebih detail daripada hanya mencocokkan genre tunggal. Ini memungkinkan rekomendasi yang lebih relevan dan beragam bagi pengguna.
+
+# **Kelebihan dan Kekurangan Content-Based Filtering**
+
+## Kelebihan
+
+1. **Personalisasi tinggi**
+
+   Rekomendasi disesuaikan dengan preferensi unik setiap pengguna berdasarkan item yang pernah mereka sukai.
+   *Contoh:* Jika seorang pengguna menyukai film *Inception* karena bergenre Sci-Fi dan Thriller, maka sistem akan merekomendasikan film seperti *Interstellar* atau *Tenet* yang memiliki genre serupa.
+
+2. **Tidak butuh data dari pengguna lain**
+
+   Sistem hanya mengandalkan informasi dari item (misalnya genre film), sehingga cocok digunakan saat jumlah pengguna masih sedikit (*cold start for user*).
+   *Contoh:* Sistem tetap bisa bekerja meski hanya ada satu pengguna karena cukup melihat genre film yang disukai.
+
+3. **Tahan terhadap serangan manipulasi user**
+
+   Karena tidak bergantung pada rating dari banyak pengguna, sistem ini relatif aman dari spam atau rating palsu.
+   *Contoh:* Tidak terpengaruh jika ada banyak akun palsu yang memberi rating tinggi ke film tertentu.
+
+## Kekurangan
+
+1. **Rekomendasi cenderung sempit (kurang variatif)**
+
+   Hanya merekomendasikan item yang sangat mirip, sehingga pengguna bisa merasa terjebak dalam "filter bubble".
+   *Contoh:* Jika pengguna suka film horor, sistem hanya akan merekomendasikan horor terus-menerus, meskipun mungkin ia juga akan suka thriller atau mystery.
+
+2. **Sulit menangkap selera kompleks**
+
+   Jika preferensi pengguna mencakup banyak genre atau aspek lain (seperti sutradara atau alur cerita), pendekatan ini bisa kurang fleksibel.
+   *Contoh:* Seorang pengguna menyukai *The Dark Knight* bukan hanya karena genre-nya, tapi juga karena sutradaranya (Christopher Nolan), namun sistem hanya melihat genre "Action" dan "Crime".
+
+3. **Ketergantungan pada representasi fitur konten**
+
+   Jika fitur kontennya tidak lengkap atau tidak akurat, maka kualitas rekomendasinya akan menurun.
+   *Contoh:* Jika informasi genre sebuah film tidak ditulis lengkap, maka sistem tidak bisa memberikan rekomendasi yang tepat.
 
 # **Evaluation**
+
+Untuk menilai kinerja dari model **content-based filtering** dalam sistem rekomendasi film ini, digunakan tiga metrik utama yang berbasis relevansi, yaitu **Precision\@k**, **Recall\@k**, dan **F1-Score\@k**. Ketiga metrik ini umum digunakan dalam evaluasi sistem rekomendasi karena dapat mengukur seberapa tepat dan lengkap rekomendasi yang diberikan.
+
+1. **Precision\@k**
+   Precision\@k mengukur seberapa banyak item yang benar-benar relevan di antara *k item* teratas yang direkomendasikan oleh sistem. Metrik ini menggambarkan **tingkat akurasi** rekomendasi.
+
+$$
+\text{Precision@k} = \frac{\text{Jumlah item relevan dalam rekomendasi}}{k}
+$$
+
+2. **Recall\@k**
+   Recall\@k menunjukkan sejauh mana sistem berhasil menemukan item yang relevan dari seluruh item relevan yang ada. Artinya, metrik ini menilai **cakupan** dari sistem rekomendasi.
+
+$$
+\text{Recall@k} = \frac{\text{Jumlah item relevan dalam rekomendasi}}{\text{Jumlah total item relevan}}
+$$
+
+3. **F1-Score\@k**
+   F1-Score\@k merupakan kombinasi dari Precision dan Recall dalam bentuk rata-rata harmonik. Metrik ini digunakan untuk menilai **keseimbangan antara ketepatan dan kelengkapan** dalam hasil rekomendasi.
+
+$$
+\text{F1-Score@k} = \frac{2 \times \text{Precision@k} \times \text{Recall@k}}{\text{Precision@k} + \text{Recall@k}}
+$$
 """
 
 # data ground truth (film relevan yang disukai user)
@@ -851,13 +929,9 @@ Film seperti Grill Point, Tough Enough, dan Big Fish direkomendasikan karena mem
 
 # **Referensi**
 
-- Adomavicius, G., & Tuzhilin, A. (2005). Toward the next generation of recommender systems: A survey of the state-of-the-art and possible extensions. IEEE Transactions on Knowledge and Data Engineering, 17(6), 734–749. https://doi.org/10.1109/TKDE.2005.99
+* Ricci, F., Rokach, L., & Shapira, B. (2011). Introduction to recommender systems handbook. In *Recommender Systems Handbook* (pp. 1–35). Springer. [https://doi.org/10.1007/978-0-387-85820-3\_1](https://doi.org/10.1007/978-0-387-85820-3_1)
 
-- Lops, P., De Gemmis, M., & Semeraro, G. (2011). Content-based recommender systems: State of the art and trends. In F. Ricci, L. Rokach, B. Shapira, & P. B. Kantor (Eds.), Recommender Systems Handbook (pp. 73–105). Springer. https://doi.org/10.1007/978-0-387-85820-3_3
+* Aggarwal, C. C. (2016). Content-based recommender systems. In *Recommender Systems: The Textbook* (pp. 139–166). Springer. [https://doi.org/10.1007/978-3-319-29659-3\_5](https://doi.org/10.1007/978-3-319-29659-3_5)
 
-- Ricci, F., Rokach, L., & Shapira, B. (2011). Introduction to recommender systems handbook. In Recommender Systems Handbook (pp. 1–35). Springer. https://doi.org/10.1007/978-0-387-85820-3_1
-
-- Aggarwal, C. C. (2016). Content-based recommender systems. In Recommender Systems: The Textbook (pp. 139–166). Springer. https://doi.org/10.1007/978-3-319-29659-3_5
-
-- Banik, R. (2017). The Movies Dataset. Kaggle. https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset
+* Banik, R. (2017). *The Movies Dataset*. Kaggle. [https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset)
 """

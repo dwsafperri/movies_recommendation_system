@@ -293,6 +293,25 @@ Data movies berhasil di filter sebanyak 10.000 data.
 
 ### **b. Mengubah Dictionary menjadi String**
 
+Kode ini bertujuan untuk memilih kolom-kolom penting dari DataFrame `movies`, memformat data pada kolom `genres`, dan menyusun ulang data dalam format yang lebih bersih dan terstruktur untuk keperluan analisis lebih lanjut.
+
+---
+
+**Penjelasan Setiap Langkah**
+
+1. **Fungsi `format_genres`**
+   Fungsi ini mengubah data dalam kolom `genres` yang awalnya berbentuk string dari list of dictionary (misalnya: `"[{'id': 28, 'name': 'Action'}, {'id': 12, 'name': 'Adventure'}]"`) menjadi string biasa yang berisi nama-nama genre yang dipisahkan dengan tanda `|`, seperti:
+   `"Action | Adventure"`.
+
+2. **`df = movies[['id', 'title']].copy()`**
+   Baris ini menyalin kolom `id` dan `title` dari DataFrame `movies`. Hanya kolom-kolom yang dianggap relevan yang diambil untuk diproses lebih lanjut.
+
+3. **`df['genres'] = movies['genres'].apply(format_genres)`**
+   Fungsi `format_genres` diterapkan ke kolom `genres` dalam DataFrame `movies`, kemudian hasilnya disimpan dalam kolom baru `genres` pada DataFrame `df`.
+
+4. **Penyusunan Ulang dan Penggantian Nama Kolom**
+   Kolom disusun ulang menjadi urutan `id`, `title`, dan `genres`, kemudian kolom `id` diubah namanya menjadi `movieId` untuk konsistensi dengan format umum pada sistem rekomendasi.
+
 ```
 python
 # Fungsi untuk memformat kolom 'genres' dari string menjadi format string genre yang dipisahkan tanda '|'

@@ -142,18 +142,7 @@ Exploratory Data Analysis (EDA) dilakukan untuk memahami pola, anomali, serta hu
 
 **Insight :**
 
-1. **Sebaran Rating Tidak Merata (Right-skewed)**
-   - Distribusi rating condong ke kanan, artinya lebih banyak film mendapatkan rating tinggi (3–5).
-   - Hanya sedikit film yang mendapat rating rendah (kurang dari 2).
-
-2. **Rating Populer di Skor 3 dan 4**
-   - Puncak tertinggi histogram ada pada rating **3 dan 4**, menunjukkan banyak pengguna memberikan rating pada kisaran ini.
-
-3. **Rating Sempurna (5) Juga Cukup Banyak**
-   - Terjadi lonjakan lagi di rating **5**, mengindikasikan banyak film yang dinilai sangat bagus.
-
-4. **Rating Ekstrem (0 - 1) Sangat Jarang**
-   - Hampir tidak ada film yang mendapat rating mendekati 0, artinya sangat sedikit yang dianggap buruk sekali.
+Grafik tersebut menunjukkan distribusi rating film dalam dataset, dengan tambahan garis KDE (Kernel Density Estimation) yang menggambarkan bentuk distribusi secara halus. Terlihat bahwa sebagian besar rating berkumpul di sekitar angka 3 hingga 4, yang berarti mayoritas pengguna memberikan penilaian cukup positif terhadap film. Puncak-puncak tajam pada garis KDE menandakan adanya frekuensi tinggi pada nilai rating tertentu, seperti 3.0, 4.0, dan 5.0. Hal ini bisa disebabkan oleh kebiasaan pengguna memberikan rating bulat. Sementara itu, rating di bawah 2 terlihat jauh lebih jarang, mengindikasikan bahwa film dengan penilaian sangat rendah lebih sedikit jumlahnya atau jarang diberikan oleh pengguna. Grafik ini menunjukkan bahwa persebaran rating cenderung positif dengan sedikit outlier di sisi rating rendah.
 
 ---
 
@@ -165,22 +154,7 @@ Exploratory Data Analysis (EDA) dilakukan untuk memahami pola, anomali, serta hu
 
 **Insight :**
 
-1. **Jumlah Film Meningkat Signifikan Setelah Tahun 1980-an**
-   - Pertumbuhan tajam terlihat mulai tahun 1980-an hingga puncak sekitar 2010–2015.
-
-2. **Ledakan Produksi Film Era 2000-an**
-   - Puncak produksi film terjadi di **2010–2015**, seiring munculnya studio independen dan platform streaming.
-
-3. **Produksi Rendah di Awal Abad ke-20**
-   - Produksi sangat sedikit sebelum 1950-an karena industri perfilman masih baru.
-
-4. **Penurunan di Akhir Distribusi (sekitar 2020)**
-   - Kemungkinan karena:
-     - **Data belum lengkap**
-     - **Pandemi COVID-19** yang menunda produksi film.
-
-5. **Distribusi Positively Skewed (Kanan)**
-   - Sebagian besar film berasal dari era modern.
+Grafik tersebut menunjukkan distribusi jumlah film berdasarkan tahun rilisnya. Terlihat bahwa produksi film masih sangat sedikit sebelum tahun 1950, lalu mulai mengalami peningkatan secara bertahap setelahnya. Lonjakan yang signifikan terjadi sejak era 1990-an hingga mencapai puncaknya sekitar tahun 2010-an. Hal ini mencerminkan perkembangan industri perfilman global, baik dari sisi teknologi, permintaan pasar, maupun kemudahan produksi dan distribusi. Penurunan setelah tahun 2015 kemungkinan disebabkan oleh data yang belum lengkap atau keterbatasan koleksi dataset, bukan berarti produksi film benar-benar menurun secara drastis. Grafik ini menegaskan bahwa mayoritas film dalam dataset berasal dari dua dekade terakhir.
 
 ---
 
